@@ -1,0 +1,23 @@
+{
+  "canvas": [
+    1280,
+    800
+  ],
+  "sourceSvgViewBox": [
+    0,
+    0,
+    392.56,
+    339.57
+  ],
+  "sourceMaskCanvas": [
+    1501,
+    1282
+  ],
+  "sourceMaskToCanvas": {
+    "scaleX": 0.5808519456925365,
+    "scaleY": 0.5817930568129213,
+    "offsetX": 207.1011433263747,
+    "offsetY": 30.916732980499955
+  },
+  "notes": "Country layers use one explicit pixel canvas. Mask alpha is registered to the SVG country outline, not stretched edge-to-edge. Region terrain and electrical simulation are unchanged."
+}

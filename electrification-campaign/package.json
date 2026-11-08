@@ -1,0 +1,29 @@
+{
+  "name": "electrification-campaign",
+  "version": "0.4.1",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "check": "tsc --noEmit && npm run check:assets",
+    "check:native": "tsc -p tsconfig.native.json --noEmit",
+    "test": "tsc -p tsconfig.model.json && node --test tests/*.test.mjs",
+    "build": "npm run check && vite build",
+    "preview": "vite preview --host 127.0.0.1",
+    "build:standalone": "tsc -p tsconfig.native.json && node scripts/check-assets.mjs && node scripts/standalone.mjs",
+    "standalone": "node scripts/serve.mjs",
+    "check:assets": "node scripts/check-assets.mjs",
+    "predev": "npm run check:assets",
+    "test:assets": "node --test tests/asset-dimensions.test.mjs"
+  },
+  "dependencies": {
+    "phaser": "4.2.1"
+  },
+  "devDependencies": {
+    "typescript": "5.8.3",
+    "vite": "8.3.6"
+  }
+}

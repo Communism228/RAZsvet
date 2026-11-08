@@ -1,0 +1,509 @@
+
+import { Assets,type GameData } from "./assets.js";
+import { Campaign,type CampaignSave,type Outcome } from "./model/campaign.js";
+import { validateBalance } from "./model/settings.js";
+import { Terrain } from "./model/terrain.js";
+import { BUILD_KINDS,NAMES,SHORT,clamp,isConsumer,isPlant,label,voltageOf,
+  type Balance,type BuildKind,type Endpoint,type Point,type Tool,type Voltage } from "./model/types.js";
+import { paint,countryRect,screenToWorld,worldView,type Camera,type PaintState,type Phase } from "./render/paint.js";
+import type { Surface } from "./render/surface.js";
+import { Audio } from "./ui/audio.js";
+
+const SAVE="electrification-campaign-v4";
+const months=["ЯНВ","ФЕВ","МАР","АПР","МАЙ","ИЮН","ИЮЛ","АВГ","СЕН","ОКТ","НОЯ","ДЕК"];
+const e=(s:unknown):string=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]!));
+const n=(value:number,digits=1):string=>value.toLocaleString("ru-RU",{maximumFractionDigits:digits});
+const monthsWord=(m:number):string=>{const mod10=m%10,mod100=m%100;return mod10===1&&mod100!==11?"месяц":mod10>=2&&mod10<=4&&(mod100<12||mod100>14)?"месяца":"месяцев";};
+const order:Tool[]=["coal","peat","hydro","transformer","pole","cable","delete"];
+const titles:Record<string,string>={coal:"УГОЛЬНАЯ ТЭС",peat:"ТОРФЯНАЯ ТЭС",hydro:"ГЭС",transformer:"ТРАНСФОРМАТОР",pole:"ОПОРА ЛЭП",cable:"КАБЕЛЬ",delete:"ДЕМОНТАЖ"};
+type Modal="matrix"|"help"|"dev"|null;
+
+export class App {
+  phase:Phase="menu";
+  campaign:Campaign;
+  balance:Balance;
+  camera:Camera;
+  width=innerWidth;height=innerHeight;time=performance.now();
+  tool:Tool="inspect";poleVoltage:Voltage="hv";
+  mouse:Point|null=null;selected:number|string|null=null;pending:Endpoint|null=null;
+  hoverRegion:string|null=null;
+  introIndex=0;introStart=0;
+  transition:{regionId:string;start:number}|null=null;
+  private preparedTerrain:Terrain|null=null;
+  private modal:Modal=null;
+  private modalWasPaused=false;
+  private saved:CampaignSave|null=null;
+  private savingFailed=false;
+  private ui:HTMLElement;
+  private toastEl:HTMLElement;
+  private toastUntil=0;
+  private last=performance.now();
+  private lastHud=0;
+  private lastSave=0;
+  private shownMessage=-1;
+  private messageUntil=0;
+  private space=false;
+  private drag:{x:number;y:number;cameraX:number;cameraY:number;pan:boolean;distance:number}|null=null;
+  private audio=new Audio();
+  private dev=new URLSearchParams(location.search).get("dev")==="1";
+  private test=new URLSearchParams(location.search).get("test")==="1";
+
+  constructor(readonly root:HTMLElement,readonly surface:Surface,readonly data:GameData,readonly assets:Assets){
+    this.balance=data.balance;
+    this.campaign=new Campaign(this.balance,data.regions,Date.now()>>>0);
+    this.camera={x:this.balance.world.widthM/2,y:this.balance.world.heightM/2,zoom:1};
+    this.ui=document.createElement("div");this.ui.id="ui";root.append(this.ui);
+    this.toastEl=document.createElement("div");this.toastEl.id="toast";this.toastEl.setAttribute("role","status");root.append(this.toastEl);
+    try{const raw=localStorage.getItem(SAVE);if(raw)this.saved=JSON.parse(raw) as CampaignSave;}catch{this.saved=null;}
+    this.bind();this.resize();this.renderUI();
+    if(this.test)Object.defineProperty(window,"__game",{value:this,configurable:true});
+    requestAnimationFrame(this.tick);
+  }
+  private state():PaintState {
+    return {width:this.width,height:this.height,time:this.time,phase:this.phase,campaign:this.campaign,
+      assets:this.assets,data:this.data,camera:this.camera,mouse:this.mouse,tool:this.tool,poleVoltage:this.poleVoltage,
+      selected:this.selected,pending:this.pending,hoverRegion:this.hoverRegion,introIndex:this.introIndex,introStart:this.introStart,transition:this.transition};
+  }
+  private tick=(now:number):void=>{
+    const dt=Math.max(0,(now-this.last)/1000);this.last=now;this.time=now;
+    try{
+      if(this.phase==="transition"&&this.preparedTerrain&&this.transition&&now-this.transition.start>=1050){
+        const t=this.preparedTerrain;this.preparedTerrain=null;this.transition=null;
+        this.campaign.begin(t.region,t);this.enterBoard();this.save();
+      }
+      if(this.phase==="region"&&!document.hidden){
+        const outcome=this.campaign.advance(dt);
+        if(outcome)this.finish(outcome);
+        if(now-this.lastSave>5000){this.save();this.lastSave=now;}
+      }
+      paint(this.surface.ctx,this.state());this.surface.present();
+      if(now-this.lastHud>100){this.updateHUD();this.lastHud=now;}
+      if(this.toastUntil>0&&now>this.toastUntil){this.toastEl.classList.remove("visible");this.toastUntil=0;}
+    }catch(error){this.failSafely(error);}
+    requestAnimationFrame(this.tick);
+  };
+  private failSafely(error:unknown):void {
+    this.campaign.paused=true;this.notify(error instanceof Error?error.message:String(error),true);
+  }
+  private resize=():void=>{
+    this.width=innerWidth;this.height=innerHeight;this.surface.resize(this.width,this.height);
+    this.clampCamera();this.positionCities();
+  };
+  private positionCities():void{
+    const layer=this.ui.querySelector<HTMLElement>("#cities");if(!layer)return;
+    const r=countryRect(this.width,this.height);
+    Object.assign(layer.style,{left:`${r.x}px`,top:`${r.y}px`,width:`${r.w}px`,height:`${r.h}px`});
+  }
+  private clampCamera():void {
+    const b=this.balance.world;
+    this.camera.zoom=clamp(this.camera.zoom,b.minZoom,b.maxZoom);
+    const base=Math.min(this.width/b.widthM,this.height/b.heightM)*this.camera.zoom;
+    const maxX=Math.min(b.widthM*b.maxPanFraction,Math.max(0,(b.widthM-this.width/base)/2));
+    const maxY=Math.min(b.heightM*b.maxPanFraction,Math.max(0,(b.heightM-this.height/base)/2));
+    this.camera.x=clamp(this.camera.x,b.widthM/2-maxX,b.widthM/2+maxX);
+    this.camera.y=clamp(this.camera.y,b.heightM/2-maxY,b.heightM/2+maxY);
+  }
+  private bind():void {
+    window.addEventListener("resize",this.resize);
+    this.ui.addEventListener("click",event=>{
+      const target=(event.target as HTMLElement).closest<HTMLElement>("[data-action]");
+      if(target)void this.action(target.dataset.action!,target).catch(error=>this.failSafely(error));
+    });
+    this.ui.addEventListener("pointerover",event=>{
+      const city=(event.target as HTMLElement).closest<HTMLElement>("[data-region]");
+      if(city)this.hoverRegion=city.dataset.region!;
+    });
+    this.ui.addEventListener("pointerout",event=>{
+      if((event.target as HTMLElement).closest("[data-region]"))this.hoverRegion=null;
+    });
+    this.ui.addEventListener("input",event=>{
+      const input=event.target as HTMLInputElement,path=input.dataset.balancePath;
+      if(!path)return;
+      const area=this.ui.querySelector<HTMLTextAreaElement>("#balance-json");
+      if(!area)return;
+      try{
+        const b=JSON.parse(area.value);let part=b;const keys=path.split(".");
+        for(const key of keys.slice(0,-1))part=part[key];
+        part[keys.at(-1)!]=Number(input.value);
+        area.value=JSON.stringify(b,null,2);
+      }catch{/* An incomplete JSON edit is reported on Apply, not every keystroke. */}
+    });
+    const canvas=this.surface.input;
+    const point=(event:PointerEvent|WheelEvent):Point=>{
+      const r=canvas.getBoundingClientRect();
+      return {x:(event.clientX-r.left)*this.width/r.width,y:(event.clientY-r.top)*this.height/r.height};
+    };
+    canvas.addEventListener("pointerdown",event=>{
+      if(event.button===2){this.pending=null;this.renderUI();return;}
+      const p=point(event),pan=this.phase==="region"&&(event.button===1||(event.button===0&&this.space));
+      this.drag={x:p.x,y:p.y,cameraX:this.camera.x,cameraY:this.camera.y,pan,distance:0};
+      if(event.button===0||pan){canvas.setPointerCapture(event.pointerId);event.preventDefault();}
+    });
+    canvas.addEventListener("pointermove",event=>{
+      const p=point(event);this.mouse=p;
+      if(this.drag){
+        this.drag.distance=Math.max(this.drag.distance,Math.hypot(p.x-this.drag.x,p.y-this.drag.y));
+        if(this.drag.pan){
+          const v=worldView(this.width,this.height,this.balance,this.camera);
+          this.camera.x=this.drag.cameraX-(p.x-this.drag.x)/v.scale;
+          this.camera.y=this.drag.cameraY-(p.y-this.drag.y)/v.scale;this.clampCamera();
+        }
+      }
+    });
+    canvas.addEventListener("pointerup",event=>{
+      const d=this.drag;this.drag=null;
+      if(canvas.hasPointerCapture(event.pointerId))canvas.releasePointerCapture(event.pointerId);
+      if(event.button===0&&d&&!d.pan&&d.distance<6)this.boardClick(point(event),event.shiftKey);
+    });
+    canvas.addEventListener("pointercancel",()=>{this.drag=null;});
+    canvas.addEventListener("pointerleave",()=>{if(!this.drag)this.mouse=null;});
+    canvas.addEventListener("contextmenu",event=>event.preventDefault());
+    canvas.addEventListener("wheel",event=>{
+      if(this.phase!=="region"||this.modal)return;
+      event.preventDefault();this.camera.zoom*=Math.exp(-event.deltaY*.0012);this.clampCamera();
+    },{passive:false});
+    window.addEventListener("keydown",event=>{
+      if((event.target as HTMLElement).matches("input,textarea,select"))return;
+      if(this.phase==="intro"&&["Space","Enter"].includes(event.code)){event.preventDefault();this.nextPanel();return;}
+      if(this.phase!=="region")return;
+      if(event.code==="Space"){this.space=true;event.preventDefault();}
+      if(event.code==="Escape"){
+        if(this.modal)this.closeModal();
+        else if(this.pending){this.pending=null;this.renderUI();}
+        else this.togglePause();
+        return;
+      }
+      if(event.code==="KeyM"){this.modal==="matrix"?this.closeModal():this.openModal("matrix");return;}
+      if(event.code==="KeyV"){this.poleVoltage=this.poleVoltage==="hv"?"lv":"hv";this.renderUI();return;}
+      if(this.modal||this.campaign.paused)return;
+      const digit=/^(?:Digit|Numpad)(\d)$/.exec(event.code)?.[1];
+      if(digit==="0")this.selectTool("inspect");
+      else if(digit&&Number(digit)<=7&&Number(digit)>0)this.selectTool(order[Number(digit)-1]);
+      if(event.code==="Delete"&&this.selected!==null){
+        const r=typeof this.selected==="number"?this.campaign.removeBuilding(this.selected):this.campaign.removeCable(this.selected);
+        this.result(r,"Демонтировано.");if(r.ok)this.selected=null;
+      }
+      if(["Equal","NumpadAdd"].includes(event.code)){this.camera.zoom*=1.15;this.clampCamera();}
+      if(["Minus","NumpadSubtract"].includes(event.code)){this.camera.zoom/=1.15;this.clampCamera();}
+      if(event.code==="Home"){this.camera={x:this.balance.world.widthM/2,y:this.balance.world.heightM/2,zoom:1};}
+    });
+    window.addEventListener("keyup",event=>{if(event.code==="Space")this.space=false;});
+    const loseFocus=()=>{
+      this.space=false;this.drag=null;
+      if(this.phase==="region"&&!this.campaign.paused){
+        this.campaign.paused=true;this.save();this.renderUI();
+      }
+      this.last=performance.now();
+    };
+    document.addEventListener("visibilitychange",()=>{if(document.hidden)loseFocus();else this.last=performance.now();});
+    window.addEventListener("blur",loseFocus);
+    window.addEventListener("pagehide",()=>this.save());
+  }
+  private async action(action:string,target:HTMLElement):Promise<void> {
+    if(action==="play"){await this.play();return;}
+    if(action==="new"){this.newGame();return;}
+    if(action==="menu"){this.phase="menu";this.modal=null;this.renderUI();return;}
+    if(action==="skip"){this.phase="country";this.save();this.renderUI();return;}
+    if(action==="next-panel"){this.nextPanel();return;}
+    if(action==="region"){await this.startRegion(target.dataset.region!);return;}
+    if(action==="next-region"){this.phase="country";this.renderUI();return;}
+    if(action==="tool"){this.selectTool(target.dataset.tool as Tool);return;}
+    if(action==="voltage"){this.poleVoltage=this.poleVoltage==="hv"?"lv":"hv";this.renderUI();return;}
+    if(action==="pause"){this.togglePause();return;}
+    if(action==="matrix"){this.modal==="matrix"?this.closeModal():this.openModal("matrix");return;}
+    if(action==="help"){this.openModal("help");return;}
+    if(action==="dev"){this.openModal("dev");return;}
+    if(action==="close"){this.closeModal();return;}
+    if(action==="zoom-in"){this.camera.zoom*=1.15;this.clampCamera();return;}
+    if(action==="zoom-out"){this.camera.zoom/=1.15;this.clampCamera();return;}
+    if(action==="home"){this.camera={x:this.balance.world.widthM/2,y:this.balance.world.heightM/2,zoom:1};return;}
+    if(action==="sound"){this.audio.enabled=!this.audio.enabled;this.audio.tone();this.renderUI();return;}
+    if(action==="inspect"){this.selectTool("inspect");return;}
+    if(action==="matrix-cable"){this.selected=target.dataset.key!;this.closeModal();return;}
+    if(action==="apply-balance"||action==="export-balance"){
+      const text=this.ui.querySelector<HTMLTextAreaElement>("#balance-json")!.value;
+      const balance=validateBalance(JSON.parse(text));
+      if(action==="export-balance"){this.download("balance.json",balance);return;}
+      this.balance=balance;this.data.balance=balance;
+      this.campaign=new Campaign(balance,this.data.regions,this.campaign.seed);
+      this.camera={x:balance.world.widthM/2,y:balance.world.heightM/2,zoom:1};
+      this.phase="country";this.modal=null;this.save();this.renderUI();
+      this.notify("Новая кампания с тем же seed. Для постоянных изменений экспортируйте balance.json.");return;
+    }
+  }
+  private async play():Promise<void> {
+    if(this.saved&&["map","playing"].includes(this.saved.status)){
+      try{
+        let terrain:Terrain|undefined;
+        if(this.saved.active){
+          const region=this.data.regions.find(r=>r.id===this.saved!.active!.regionId);
+          if(!region)throw new Error("Регион сохранения не найден.");
+          this.notify("Загрузка сохранённого региона…");terrain=await this.assets.terrain(region,this.balance);
+        }
+        this.campaign=Campaign.restore(this.saved,this.balance,this.data.regions,terrain);
+        if(this.campaign.status==="playing")this.enterBoard();
+        else {this.phase="country";this.renderUI();}
+        return;
+      }catch(error){this.saved=null;this.notify(error instanceof Error?error.message:String(error),true);}
+    }
+    this.newGame();
+  }
+  private newGame():void {
+    this.campaign=new Campaign(this.balance,this.data.regions,Date.now()>>>0);
+    this.saved=null;this.modal=null;this.selected=null;this.pending=null;this.phase="intro";
+    this.introIndex=0;this.introStart=this.time;
+    this.save();this.renderUI();
+  }
+  private nextPanel():void {
+    if(this.phase!=="intro")return;
+    if(this.time-this.introStart<this.data.intro.fadeMs){this.introStart=this.time-this.data.intro.fadeMs;return;}
+    if(this.introIndex<this.data.intro.panels.length-1){this.introIndex++;this.introStart=this.time;}
+    else {this.phase="country";this.save();}
+    this.renderUI();
+  }
+  async startRegion(id:string):Promise<void> {
+    if(this.phase!=="country"||this.campaign.status!=="map"||this.campaign.completed.includes(id))return;
+    const region=this.data.regions.find(r=>r.id===id);if(!region)return;
+    this.phase="transition";this.transition={regionId:id,start:this.time};this.preparedTerrain=null;this.renderUI();
+    try{this.preparedTerrain=await this.assets.terrain(region,this.balance);}
+    catch(error){this.phase="country";this.transition=null;this.renderUI();this.failSafely(error);}
+  }
+  private enterBoard():void {
+    this.phase="region";this.tool="inspect";this.selected=null;this.pending=null;this.mouse=null;
+    this.camera={x:this.balance.world.widthM/2,y:this.balance.world.heightM/2,zoom:1};
+    this.modal=null;this.shownMessage=-1;this.messageUntil=0;this.last=performance.now();
+    this.renderUI();
+  }
+  private finish(outcome:Outcome):void {
+    this.pending=null;this.selected=null;this.modal=null;this.phase="result";
+    this.hoverRegion=null;this.save();this.audio.tone(outcome.success);this.renderUI();
+  }
+  private selectTool(tool:Tool):void {
+    if(this.phase!=="region")return;
+    this.tool=tool;this.pending=null;this.renderUI();
+  }
+  private boardClick(p:Point,chain:boolean):void {
+    try{
+      if(this.phase==="intro"){this.nextPanel();return;}
+      if(this.phase!=="region"||this.campaign.paused||this.modal||!this.campaign.world)return;
+      const w=this.campaign.world,point=screenToWorld(p,this.state()),b=w.hit(point);
+      if(this.tool==="inspect"){this.selected=b?.id??w.cableAt(point)?.key??null;this.renderUI();return;}
+      if(this.tool==="delete"){
+        const cable=w.cableAt(point);
+        const r=b?this.campaign.removeBuilding(b.id):cable?this.campaign.removeCable(cable.key):null;
+        if(r){this.result(r,r.ok?`Возвращено ${n(r.value)} ₽.`:"");if(r.ok)this.selected=null;}
+        else this.notify("Нажмите на здание или кабель для демонтажа.");
+        return;
+      }
+      if(this.tool==="cable"){
+        if(!b){this.notify("Выберите здание. У трансформатора вход слева, выход справа.");return;}
+        const endpoint=w.endpointAt(b,point);
+        if(!this.pending){this.pending=endpoint;this.selected=b.id;this.renderUI();return;}
+        if(this.pending.id===b.id){this.pending=null;this.renderUI();return;}
+        const r=this.campaign.connect(this.pending,endpoint);
+        if(r.ok){this.pending=chain&&b.kind==="pole"?endpoint:null;this.selected=b.id;}
+        this.result(r,"Кабель проложен.");return;
+      }
+      const r=this.campaign.place(this.tool as BuildKind,point.x,point.y,this.poleVoltage);
+      if(r.ok)this.selected=w.buildings.at(-1)!.id;
+      this.result(r,"Сооружение построено.");
+    }catch(error){this.failSafely(error);this.renderUI();}
+  }
+  private result(r:{ok:boolean;error?:string},success:string):void {
+    this.audio.tone(r.ok);this.notify(r.ok?success:r.error??"Действие невозможно.",!r.ok);
+    if(r.ok)this.save();this.renderUI();
+  }
+  private togglePause():void {
+    if(this.phase!=="region")return;
+    this.campaign.paused=!this.campaign.paused;this.last=performance.now();this.save();this.renderUI();
+  }
+  private openModal(modal:Modal):void {
+    if(this.modal)this.closeModal();
+    this.modalWasPaused=this.campaign.paused;
+    if(modal==="dev"||modal==="help")this.campaign.paused=true;
+    this.modal=modal;this.renderUI();
+  }
+  private closeModal():void {
+    if(this.modal==="help"||this.modal==="dev")this.campaign.paused=this.modalWasPaused;
+    this.modal=null;this.last=performance.now();this.renderUI();
+  }
+  private save():void {
+    if(!this.campaign)return;
+    try{
+      this.saved=this.campaign.snapshot();localStorage.setItem(SAVE,JSON.stringify(this.saved));
+    }catch{
+      if(!this.savingFailed){this.savingFailed=true;this.notify("Браузер запретил сохранение. Прогресс сохранится только до закрытия страницы.",true);}
+    }
+  }
+  notify(message:string,error=false):void {
+    this.toastEl.textContent=message;this.toastEl.className=`visible${error?" error":""}`;
+    this.toastUntil=this.time+4500;
+  }
+  private download(name:string,data:unknown):void {
+    const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:"application/json"}));
+    const a=document.createElement("a");a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  }
+  private inspector():string {
+    const w=this.campaign.world;if(!w||this.selected===null)return "";
+    if(typeof this.selected==="string"){
+      const c=w.cables().find(c=>c.key===this.selected),f=this.campaign.sim?.cables.get(this.selected);
+      if(!c)return "";
+      const flow=f?.flows[0];
+      return `<aside class="inspector"><div class="eyebrow">ЛИНИЯ / ${c.voltage==="hv"?"ВЫСОКОЕ":"НИЗКОЕ"} НАПРЯЖЕНИЕ</div>
+      <h3>${n(c.length/1000,2)} км <span>${n(this.balance.lines[c.voltage].voltageV)} В</span></h3>
+      <p>Передано ${n(flow?.sentKW??0)} кВт → получено ${n(flow?.receivedKW??0)} кВт</p>
+      <p>Потери: <strong>${n(f?.lossKW??0,2)} кВт</strong> · Возврат: ${n(c.paid*this.balance.economy.refundFraction)} ₽</p></aside>`;
+    }
+    const b=w.byId(this.selected);if(!b)return "";
+    let detail="";
+    if(isPlant(b))detail=`Выработка ${n(this.campaign.sim?.generationKW.get(b.id)??0)} / ${n(b.generationKW)} кВт · выход 10 кВ`;
+    else if(isConsumer(b)){
+      const power=this.campaign.sim?.consumerKW.get(b.id)??0;
+      const plan=this.campaign.objectives.find(o=>o.id===b.id);
+      detail=`Получено ${n(power)} / ${n(b.demandKW)} кВт · ${n(power/b.demandKW*100)}%<br>`+
+        (plan?`<strong>Госплан:</strong> объект должен быть запитан к сроку.`:(b.kind==="factory"?"Промышленный объект. Дохода не приносит.":`Доход при полном питании: ${n(b.incomePerSec)} ₽/с`))+
+        (b.kind!=="factory"?`<br>Доход при полном питании: ${n(b.incomePerSec)} ₽/с`:" Дохода не приносит.");
+    }else if(b.kind==="transformer")detail=`10 000 В → 400 В · КПД ${n(b.efficiency*100)}%<br>Выход ${n(this.campaign.sim?.transformer.get(b.id)?.outputKW??0)} / ${n(b.outputLimitKW)} кВт`;
+    else detail=`Опора ${b.voltage==="hv"?"10 кВ":"400 В"}. Только одно напряжение; преобразования нет.`;
+    return `<aside class="inspector"><div class="eyebrow">${e(label(b))} / ${e(NAMES[b.kind])}</div>
+      <h3>${e(b.name||NAMES[b.kind])}</h3><p>${detail}</p>
+      ${b.fixed?"":`<p class="muted">Демонтаж: возврат ${n(b.paid*this.balance.economy.refundFraction)} ₽ + кабели.</p>`}</aside>`;
+  }
+  private toolHint():string {
+    if(this.tool==="cable")return this.pending?"Теперь выберите второй конец. Shift — продолжить цепочку через опору.":"Кликните по двум зданиям. ВН: жёлтый порт; НН: голубой. Напряжения должны совпадать.";
+    if(this.tool==="delete")return `Удалите своё здание или кабель. Возврат ${n(this.balance.economy.refundFraction*100)}% уплаченной цены. Поселения и заводы защищены.`;
+    if(this.tool==="inspect")return "Подключите поселения для дохода, затем обеспечьте все отмеченные госпланы. Нажмите ? для схемы подключения.";
+    if(this.tool==="pole")return `Опора ${this.poleVoltage==="hv"?"10 кВ":"400 В"} · V меняет тип · кабель можно провести над водой.`;
+    if(this.tool==="transformer")return "Трансформатор: вход 10 кВ слева, выход 400 В справа. Ставьте ближе к потребителю.";
+    if(this.tool==="hydro")return "ГЭС: центр здания должен находиться на разрешённой реке.";
+    return this.tool==="coal"?"Угольная ТЭС: внутри зоны угольного месторождения.":"Торфяная ТЭС: внутри зоны торфяного болота.";
+  }
+  private matrix():string {
+    const w=this.campaign.world;if(!w)return "";
+    return `<div class="sheet matrix-sheet"><header><div><div class="eyebrow">ДИАГНОСТИКА СЕТИ</div><h2>Матрица смежности</h2></div><button data-action="close" class="icon-button" aria-label="Закрыть">×</button></header>
+      <p>Ячейки показаны в <b>км</b>; в модели хранятся метры. 0 — кабеля нет. Время продолжает идти.</p>
+      <div class="matrix-scroll"><table><thead><tr><th></th>${w.buildings.map(b=>`<th title="${e(b.name||NAMES[b.kind])}">${e(label(b))}</th>`).join("")}</tr></thead><tbody>
+      ${w.buildings.map((a,i)=>`<tr><th>${e(label(a))}</th>${w.buildings.map((b,j)=>`<td>${w.adjacency[i][j]>0?`<button data-action="matrix-cable" data-key="${a.id<b.id?`${a.id}-${b.id}`:`${b.id}-${a.id}`}">${n(w.adjacency[i][j]/1000,2)}</button>`:"<span>0</span>"}</td>`).join("")}</tr>`).join("")}
+      </tbody></table></div><p class="muted">Кабели и расчёт берут топологию именно из этой матрицы. Направление преобразования и тип напряжения задаются портами.</p></div>`;
+  }
+  private help():string {
+    return `<div class="modal-backdrop"><section class="dialog help-dialog"><button class="close" data-action="close" aria-label="Закрыть">×</button>
+      <div class="eyebrow">КАК ВЫПОЛНИТЬ ПЛАН</div><h2>Сначала доход.<br>Затем промышленность.</h2>
+      <div class="connection-guide"><span>ТЭС / ГЭС<br><b>10 кВ</b></span><i>→</i><span>Опора ВН<br><b>10 кВ</b></span><i>→</i><span>Трансформатор<br><b>10 кВ → 400 В</b></span><i>→</i><span>Потребитель<br><b>400 В</b></span></div>
+      <p>1. Постройте станцию в подходящей зоне: уголь, торф или река. 2. Подведите высоковольтную линию к трансформатору рядом с поселением. 3. Соедините низковольтный выход с потребителем.</p>
+      <p>Длинная линия требует промежуточных опор. Тип опоры переключается <kbd>V</kbd>. Вход трансформатора слева, выход справа. Потребители и станции не передают чужую мощность.</p>
+      <p>Поселения при 100% питания дают деньги каждую секунду. Отмеченные красным свечением госпланы должны иметь полное питание <strong>одновременно в момент окончания срока</strong>. Заводы не приносят доход, а города и деревни продолжают приносить его как обычно.</p>
+      <p>Колесо — масштаб. Средняя кнопка или пробел + перетаскивание — камера. <kbd>0</kbd> — выбор, <kbd>1–7</kbd> — инструменты, <kbd>M</kbd> — матрица, <kbd>Esc</kbd> — отмена или пауза.</p>
+      <p class="muted">Пока эта справка открыта, время и доход остановлены.</p><button class="primary" data-action="close">К РАБОТЕ</button></section></div>`;
+  }
+  private developerPanel():string {
+    const fields:[string,string,number][]=[
+      ["Стартовые деньги","economy.startingMoney",this.balance.economy.startingMoney],
+      ["Первый этап, с","campaign.baseSeconds",this.balance.campaign.baseSeconds],
+      ["Минимум, с","campaign.minSeconds",this.balance.campaign.minSeconds],
+      ["Уменьшение, с","campaign.decreaseSeconds",this.balance.campaign.decreaseSeconds],
+      ["Рост цен (0.08 = 8%)","campaign.priceGrowth",this.balance.campaign.priceGrowth],
+      ["Цена угольной ТЭС","buildings.coal.price",this.balance.buildings.coal.price],
+      ["Мощность угольной, кВт","buildings.coal.generationKW",this.balance.buildings.coal.generationKW!],
+      ["Доход деревни, ₽/с","buildings.village.incomePerSec",this.balance.buildings.village.incomePerSec!]
+    ];
+    return `<div class="modal-backdrop"><section class="dialog dev-dialog"><button class="close" data-action="close" aria-label="Закрыть">×</button>
+      <div class="eyebrow">РЕЖИМ РАЗРАБОТЧИКА / SEED ${this.campaign.seed}</div><h2>Баланс игры</h2>
+      <p>Применение начнёт новую кампанию с тем же seed. Экспортируйте файл и замените <code>public/data/balance.json</code>, чтобы сохранить изменения в проекте.</p>
+      <div class="balance-fields">${fields.map(([title,path,value])=>`<label>${e(title)}<input type="number" step="any" value="${value}" data-balance-path="${path}"></label>`).join("")}</div>
+      <label class="json-label">Все настройки<textarea id="balance-json" spellcheck="false">${e(JSON.stringify(this.balance,null,2))}</textarea></label>
+      <div class="button-row"><button data-action="apply-balance" class="primary">ПРИМЕНИТЬ И ПЕРЕЗАПУСТИТЬ</button><button data-action="export-balance">ЭКСПОРТ BALANCE.JSON</button></div>
+      </section></div>`;
+  }
+  private renderUI():void {
+    let html="";
+    const c=this.campaign;
+    if(this.phase==="menu"){
+      const resume=this.saved&&["map","playing"].includes(this.saved.status);
+      html=`<div class="menu-content"><div class="eyebrow">БЕЛАРУСЬ / СТРАТЕГИЯ ЭЛЕКТРИФИКАЦИИ</div>
+        <h1>ПЛАН<br><em>СВЕТА</em></h1><div class="title-line"></div>
+        <p>Проведите энергию через страну.<br>Дайте свет поселениям.<br>Выполните промышленный план.</p>
+        <button class="play-button" data-action="play">ИГРАТЬ <span>→</span></button>
+        ${resume?`<div class="resume-note">Продолжить сохранённую кампанию · ${e(this.saved!.completed.length)}/6 областей</div><button class="text-button" data-action="new">Начать заново</button>`:""}
+        </div><div class="menu-footer"><span>1922 — 1927 / ИГРОВАЯ КАМПАНИЯ</span><span>УСЛОВНЫЕ КАРТЫ И РЕСУРСЫ</span></div>
+        ${this.dev?'<button class="dev-corner" data-action="dev">БАЛАНС</button>':""}`;
+    }else if(this.phase==="intro"){
+      html=`<div class="intro-top"><span>ИСТОРИЯ СВЕТА</span><button data-action="skip" class="text-button">Пропустить →</button></div>
+        <div class="intro-bottom"><span>${this.introIndex+1} / ${this.data.intro.panels.length}</span><button data-action="next-panel">ДАЛЕЕ <span>→</span></button><small>Клик или пробел · панели остаются на странице</small></div>`;
+    }else if(this.phase==="country"){
+      html=`<header class="country-header"><div><div class="eyebrow">ГОСУДАРСТВЕННЫЙ ПЛАН / ${this.balance.campaign.firstYear+c.stage}</div><h2>ВЫБЕРИТЕ ОБЛАСТЬ</h2></div>
+        <div class="country-budget"><small>ОБЩАЯ КАЗНА</small><strong>${n(c.money,0)} <span>₽</span></strong></div></header>
+        <div id="cities">${this.data.regions.map(r=>`<button class="city-button ${c.completed.includes(r.id)?"completed":""}" style="left:${r.city.u*100}%;top:${r.city.v*100}%" data-action="region" data-region="${r.id}" ${c.completed.includes(r.id)?"disabled":""}>
+          <i></i><span>${e(r.name.toUpperCase())}</span><small>${c.completed.includes(r.id)?"ПЛАН ВЫПОЛНЕН":"ВЫБРАТЬ РЕГИОН"}</small></button>`).join("")}</div>
+        <footer class="country-footer"><span><b>${c.completed.length} / ${this.data.regions.length}</b> ОБЛАСТЕЙ ЭЛЕКТРИФИЦИРОВАНО</span><span>СЛЕДУЮЩИЙ СРОК: <b>${c.duration} с</b> · ЦЕНЫ: <b>×${n(c.priceFactor,2)}</b></span></footer>
+        <div class="map-note">Схематическая карта. Ресурсы и участки вымышлены.</div>
+        ${this.dev?'<button class="dev-corner" data-action="dev">БАЛАНС</button>':""}`;
+    }else if(this.phase==="transition"){
+      html='<div class="transition-label">РАЗВОРАЧИВАНИЕ РЕГИОНАЛЬНОГО ПЛАНА…</div>';
+    }else if(this.phase==="region"){
+      html=`<header class="hud-top"><div class="top-left"><button class="icon-button" data-action="pause" title="Пауза (Esc)" aria-label="Пауза">Ⅱ</button><button class="icon-button" data-action="help" title="Справка">?</button><button class="icon-button sound-button" data-action="sound" title="Звук">${this.audio.enabled?"♪":"♩"}</button><div class="region-name"><small>ОБЛАСТНОЙ ПЛАН</small><b>${e(c.region!.name.toUpperCase())}</b></div></div>
+        <div class="year"><b>${this.balance.campaign.firstYear+c.stage}</b><small>ГОД</small></div>
+        <div class="ledger"><div class="ledger-top"><span>ГОСПЛАН</span><b id="factories-hud">0 / 0</b></div><div class="ledger-caption">ГОСПЛАНОВ ОБЕСПЕЧЕНО</div><div class="money"><strong id="money">0</strong><span>₽</span></div><div class="income" id="income">+0 ₽/с</div></div></header>
+        <div class="foreman" id="foreman"><img src="${e(new URL(this.data.manifest.overseer,document.baseURI).href)}" alt="Надсмотрщик"><div><small>УПОЛНОМОЧЕННЫЙ ПО ПЛАНУ</small><p id="foreman-text"></p></div></div>
+        <aside class="time-panel"><div class="time-title">СРОК</div><div class="month-track"><div id="time-fill"></div>${months.map((m,i)=>`<div class="month" data-month="${i}">${m}</div>`).join("")}</div><strong id="countdown">3:00</strong></aside>
+        <div class="map-controls"><button data-action="matrix" title="Матрица (M)">СЕТЬ</button><button data-action="zoom-in" aria-label="Приблизить">+</button><button data-action="zoom-out" aria-label="Отдалить">−</button><button data-action="home" title="Сбросить камеру">⌂</button>${this.dev?'<button data-action="dev">DEV</button>':""}</div>
+        <div class="inspector-container">${this.inspector()}</div>
+        <div class="build-area"><div class="build-top"><button class="voltage-toggle ${this.poleVoltage}" data-action="voltage"><span>ОПОРА</span> ${this.poleVoltage==="hv"?"10 кВ / ВН":"400 В / НН"} <kbd>V</kbd></button><div class="tool-hint">${e(this.toolHint())}</div><button data-action="inspect" class="inspect-button ${this.tool==="inspect"?"selected":""}" title="Выбор (0)">ВЫБОР <kbd>0</kbd></button></div>
+        <nav class="dock" aria-label="Строительство">${order.map((t,i)=>{
+          const build=BUILD_KINDS.includes(t as BuildKind),price=build?`${c.price(t as BuildKind)} ₽`:t==="cable"?`${n(this.balance.lines.hv.pricePerKm*c.priceFactor,1)} ₽/км ВН`:`ВОЗВРАТ ${n(this.balance.economy.refundFraction*100)}%`;
+          return `<button data-action="tool" data-tool="${t}" class="build-card ${this.tool===t?"selected":""}"><kbd>${i+1}</kbd>
+          ${build?`<img src="${e(this.assets.thumb(t as BuildKind))}" alt="">`:`<span class="tool-symbol">${t==="cable"?"∿":"×"}</span>`}
+          <b>${titles[t]}</b><small>${price}</small></button>`;
+        }).join("")}</nav></div>
+        <div class="network-foot" id="network-foot"></div>
+        ${c.paused&&!this.modal?`<div class="modal-backdrop pause-backdrop"><section class="dialog pause-dialog"><div class="eyebrow">ВРЕМЯ И ДОХОД ОСТАНОВЛЕНЫ</div><h2>ПАУЗА</h2><button class="primary" data-action="pause">ПРОДОЛЖИТЬ</button><button class="text-button" data-action="menu">В главное меню</button></section></div>`:""}`;
+    }else if(this.phase==="result"){
+      const o=c.lastOutcome!,win=c.status==="won";
+      html=`<section class="result-card ${o.success?"success":"failure"}"><div class="eyebrow">${o.success?"ДОКЛАД ПРИНЯТ":"ПЛАН СОРВАН"} / ${e(o.regionName.toUpperCase())}</div>
+        <h1>${win?"СТРАНА<br><em>СТАЛА СВЕТЛЕЕ</em>":o.success?"ПЛАН<br><em>ВЫПОЛНЕН</em>":"ВЫ НЕ ВЫПОЛНИЛИ ПЛАН<br><em>И ОТПРАВЛЯЕТЕСЬ В СИБИРЬ</em>"}</h1>
+        <p>${win?"Все шесть регионов электрифицированы.":o.success?"Регион освещён и закрыт. Накопленные деньги переходят в следующий этап.":"В момент окончания срока не все объекты госплана получали необходимую мощность."}</p>
+        <div class="result-stats"><div><small>ГОСПЛАНЫ</small><b>${o.poweredObjectives} / ${o.objectives}</b></div><div><small>ДОХОД ЭТАПА</small><b>${n(o.incomeEarned,0)} ₽</b></div><div><small>В КАЗНЕ</small><b>${n(c.money,0)} ₽</b></div></div>
+        <button class="primary" data-action="${o.success&&!win?"next-region":"new"}">${o.success&&!win?"ВЫБРАТЬ СЛЕДУЮЩУЮ ОБЛАСТЬ":"НОВАЯ КАМПАНИЯ"} →</button>
+        <button class="text-button" data-action="menu">В главное меню</button></section>`;
+    }
+    if(this.modal==="matrix")html+=this.matrix();
+    if(this.modal==="help")html+=this.help();
+    if(this.modal==="dev")html+=this.developerPanel();
+    this.ui.className=`phase-${this.phase}`;
+    this.ui.innerHTML=html;this.positionCities();this.updateHUD();
+  }
+  private updateHUD():void {
+    if(this.phase!=="region")return;
+    const c=this.campaign;
+    const set=(id:string,value:string)=>{const el=this.ui.querySelector<HTMLElement>("#"+id);if(el&&el.textContent!==value)el.textContent=value;};
+    set("money",n(Math.floor(c.money),0));
+    set("income",`+${n(c.incomeRate)} ₽/с`);
+    set("factories-hud",`${c.poweredObjectives} / ${c.objectiveCount}`);
+    const left=Math.ceil(c.remaining);
+    set("countdown",`${Math.floor(left/60)}:${String(left%60).padStart(2,"0")}`);
+    const fill=this.ui.querySelector<HTMLElement>("#time-fill");
+    if(fill)fill.style.height=`${clamp(c.elapsed/c.duration*100,0,100)}%`;
+    for(const m of this.ui.querySelectorAll<HTMLElement>("[data-month]"))
+      m.classList.toggle("elapsed",(Number(m.dataset.month)+.5)/12<c.elapsed/c.duration);
+    for(const button of this.ui.querySelectorAll<HTMLElement>("[data-tool]")){
+      const kind=button.dataset.tool as BuildKind;
+      button.classList.toggle("unaffordable",BUILD_KINDS.includes(kind)&&c.price(kind)>c.money);
+    }
+    const sim=c.sim;
+    set("network-foot",`ВЫРАБОТКА ${n(sim?.generatedKW??0)} кВт  /  ПОТРЕБЛЕНИЕ ${n(sim?.deliveredKW??0)} кВт  /  ПОТЕРИ ${n((sim?.cableLossKW??0)+(sim?.transformerLossKW??0),2)} кВт`);
+    const messages=this.data.messages;
+    const index=Math.floor(c.elapsed/messages.everySeconds),message=this.ui.querySelector<HTMLElement>("#foreman");
+    if(message){
+      if(index!==this.shownMessage){
+        this.shownMessage=index;this.messageUntil=c.elapsed+messages.displaySeconds;
+      }
+      const plans=c.objectives;
+      const plan=plans.length?plans[index%plans.length]:null;
+      const remark=c.poweredObjectives===c.objectiveCount&&c.objectiveCount>0?"Все объекты госплана получают питание. Удерживайте сеть до конца срока.":
+        c.remaining<messages.urgentBelowSeconds&&plan?`Товарищ! Напоминаю: "${plan.name}" должен быть запитан без перебоев.`:
+        plan?(index<plans.length?`Товарищ! Партия постановила вам запитать "${plan.name}" в течение ${plan.months} ${monthsWord(plan.months)}.`:`Товарищ! Напоминаю о госплане: "${plan.name}" должен быть обеспечен электроэнергией.`):messages.regular[index%messages.regular.length];
+      set("foreman-text",remark);
+      message.classList.toggle("visible",c.elapsed<this.messageUntil&&!c.paused);
+    }
+  }
+}

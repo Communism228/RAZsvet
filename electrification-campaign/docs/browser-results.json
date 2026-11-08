@@ -1,0 +1,41 @@
+{
+  "checks": [
+    "Menu loads all assets and has one primary Play action.",
+    "Comic click completes current fade first; panels then reveal in order on one page.",
+    "Full-page transparent comic layers preserve earlier panels and empty captions add no text strip.",
+    "Six region buttons and city hover scaling work.",
+    "Zoom/fade transition enters a region with five settlements, two factories and real raster masks.",
+    "Station purchase via keyboard/mouse charges once; overlap and out-of-deposit clicks spend nothing.",
+    "Mouse-built 10 kV -> transformer -> 400 V network lights a village and starts income.",
+    "Fixed settlements cannot be deleted.",
+    "Pole voltage toggles with V; incompatible endpoints are rejected.",
+    "Demolition refunds actual purchase value.",
+    "Optional matrix matches the model; a nonzero cell selects the real cable.",
+    "Pause stops both active time and income.",
+    "Help pauses and resumes the prior state.",
+    "Camera zoom/pan is bounded and never changes physical cable distances.",
+    "Window blur pauses the game; it does not earn background income.",
+    "Real-mask reference network powers both factories without bypassing prices or constraints.",
+    "Factories are not hidden beneath the construction dock at the initial zoom.",
+    "HUD and all seven build tools remain within view at 1440x900, 1280x800 and 960x640.",
+    "Save reconstruction restores cash, topology and elapsed time, and resumes paused (storage fixture).",
+    "Disconnecting a factory before the deadline produces the requested failure screen.",
+    "A successful deadline illuminates and locks the completed region.",
+    "Next region keeps the treasury, stops old-region income and increases difficulty.",
+    "Developer balance fields update JSON and restart with the same seed and new budget.",
+    "No uncaught browser exceptions during all scenarios."
+  ],
+  "count": 24,
+  "errors": [],
+  "reference_network": {
+    "actions": 13,
+    "waited": 0,
+    "money": 73.51478999999988,
+    "elapsed": 20.33250000000028,
+    "income": 3.7,
+    "generation": 384.3789917753279,
+    "delivered": 344,
+    "losses": 40.3789917753261
+  },
+  "scope": "Native Canvas; about:blank fixture, embedded assets, in-memory storage. Not Phaser or real HTTP persistence."
+}

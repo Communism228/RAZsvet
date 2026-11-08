@@ -1,0 +1,100 @@
+{
+  "regions": [
+    {
+      "id": "grodno",
+      "mask": [
+        1280,
+        800
+      ],
+      "composite": [
+        1280,
+        800
+      ],
+      "cityAlpha": 255,
+      "buildings": 10,
+      "plans": 4
+    },
+    {
+      "id": "brest",
+      "mask": [
+        1280,
+        800
+      ],
+      "composite": [
+        1280,
+        800
+      ],
+      "cityAlpha": 255,
+      "buildings": 10,
+      "plans": 4
+    },
+    {
+      "id": "minsk",
+      "mask": [
+        1280,
+        800
+      ],
+      "composite": [
+        1280,
+        800
+      ],
+      "cityAlpha": 255,
+      "buildings": 10,
+      "plans": 4
+    },
+    {
+      "id": "vitebsk",
+      "mask": [
+        1280,
+        800
+      ],
+      "composite": [
+        1280,
+        800
+      ],
+      "cityAlpha": 255,
+      "buildings": 10,
+      "plans": 4
+    },
+    {
+      "id": "mogilev",
+      "mask": [
+        1280,
+        800
+      ],
+      "composite": [
+        1280,
+        800
+      ],
+      "cityAlpha": 255,
+      "buildings": 10,
+      "plans": 4
+    },
+    {
+      "id": "gomel",
+      "mask": [
+        1280,
+        800
+      ],
+      "composite": [
+        1280,
+        800
+      ],
+      "cityAlpha": 255,
+      "buildings": 10,
+      "plans": 4
+    }
+  ],
+  "maps": [
+    [
+      1280,
+      800
+    ],
+    [
+      1280,
+      800
+    ]
+  ],
+  "browser": "144.0.7559.96",
+  "errors": []
+}

@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 3,
+  "economy": {
+    "startingMoney": 450,
+    "refundFraction": 0.5,
+    "completionBonus": 0
+  },
+  "campaign": {
+    "baseSeconds": 180,
+    "decreaseSeconds": 15,
+    "minSeconds": 120,
+    "priceGrowth": 0.08,
+    "firstYear": 1922
+  },
+  "world": {
+    "widthM": 20000,
+    "heightM": 12500,
+    "clearanceM": 90,
+    "maxBuildings": 60,
+    "maxCables": 90,
+    "minZoom": 1,
+    "maxZoom": 1.65,
+    "maxPanFraction": 0.14
+  },
+  "simulation": {
+    "lossSegments": 16,
+    "fullPowerThreshold": 0.999
+  },
+  "buildings": {
+    "coal": {
+      "price": 120,
+      "generationKW": 420,
+      "widthM": 920,
+      "heightM": 850
+    },
+    "peat": {
+      "price": 85,
+      "generationKW": 240,
+      "widthM": 880,
+      "heightM": 840
+    },
+    "hydro": {
+      "price": 180,
+      "generationKW": 520,
+      "widthM": 950,
+      "heightM": 800
+    },
+    "pole": {
+      "price": 8,
+      "widthM": 300,
+      "heightM": 420
+    },
+    "transformer": {
+      "price": 35,
+      "outputLimitKW": 200,
+      "efficiency": 0.96,
+      "widthM": 760,
+      "heightM": 650
+    },
+    "village": {
+      "price": 0,
+      "demandKW": 24,
+      "incomePerSec": 1.3,
+      "widthM": 850,
+      "heightM": 700
+    },
+    "city": {
+      "price": 0,
+      "demandKW": 60,
+      "incomePerSec": 2.4,
+      "widthM": 1100,
+      "heightM": 880
+    },
+    "factory": {
+      "price": 0,
+      "demandKW": 130,
+      "incomePerSec": 0,
+      "widthM": 1050,
+      "heightM": 880
+    }
+  },
+  "lines": {
+    "hv": {
+      "voltageV": 10000,
+      "maxLengthM": 3800,
+      "resistanceOhmPerM": 0.00012,
+      "maxCurrentA": 250,
+      "pricePerKm": 8
+    },
+    "lv": {
+      "voltageV": 400,
+      "maxLengthM": 1600,
+      "resistanceOhmPerM": 6e-05,
+      "maxCurrentA": 500,
+      "pricePerKm": 6
+    }
+  }
+}

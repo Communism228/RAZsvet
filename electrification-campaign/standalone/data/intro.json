@@ -1,0 +1,64 @@
+{
+  "width": 4724,
+  "height": 7087,
+  "fadeMs": 650,
+  "fullPageLayers": true,
+  "panels": [
+    {
+      "image": "assets/intro/1-base.png",
+      "caption": "",
+      "x": 0,
+      "y": 0,
+      "width": 4724,
+      "height": 7087
+    },
+    {
+      "image": "assets/intro/2-base.png",
+      "caption": "",
+      "x": 0,
+      "y": 0,
+      "width": 4724,
+      "height": 7087
+    },
+    {
+      "image": "assets/intro/3-base.png",
+      "caption": "",
+      "x": 0,
+      "y": 0,
+      "width": 4724,
+      "height": 7087
+    },
+    {
+      "image": "assets/intro/4-base.png",
+      "caption": "",
+      "x": 0,
+      "y": 0,
+      "width": 4724,
+      "height": 7087
+    },
+    {
+      "image": "assets/intro/5-base.png",
+      "caption": "",
+      "x": 0,
+      "y": 0,
+      "width": 4724,
+      "height": 7087
+    },
+    {
+      "image": "assets/intro/6-base.png",
+      "caption": "",
+      "x": 0,
+      "y": 0,
+      "width": 4724,
+      "height": 7087
+    },
+    {
+      "image": "assets/intro/7-base.png",
+      "caption": "",
+      "x": 0,
+      "y": 0,
+      "width": 4724,
+      "height": 7087
+    }
+  ]
+}

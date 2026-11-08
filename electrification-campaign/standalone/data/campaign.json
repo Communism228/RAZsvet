@@ -1,0 +1,10 @@
+{
+  "regions": [
+    "data/regions/grodno.json",
+    "data/regions/brest.json",
+    "data/regions/minsk.json",
+    "data/regions/vitebsk.json",
+    "data/regions/mogilev.json",
+    "data/regions/gomel.json"
+  ]
+}

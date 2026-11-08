@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "rootDir": "src",
+    "outDir": "standalone/js"
+  },
+  "include": [
+    "src/standalone.ts"
+  ],
+  "exclude": [
+    "src/main.ts",
+    "src/render/phaser.ts"
+  ]
+}

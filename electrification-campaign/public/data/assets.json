@@ -1,0 +1,86 @@
+{
+  "country": {
+    "dark": "assets/country/dark.svg",
+    "light": "assets/country/light.svg"
+  },
+  "sprites": {
+    "coal": {
+      "idle": "assets/sprites/coal.png",
+      "powered": "assets/sprites/coal.png",
+      "icon": "assets/sprites/coal.png",
+      "width": 60.0,
+      "height": 56.0,
+      "anchorX": 0.5,
+      "anchorY": 0.58
+    },
+    "peat": {
+      "idle": "assets/sprites/peat.png",
+      "powered": "assets/sprites/peat.png",
+      "icon": "assets/sprites/peat.png",
+      "width": 58.0,
+      "height": 55.0,
+      "anchorX": 0.5,
+      "anchorY": 0.58
+    },
+    "hydro": {
+      "idle": "assets/sprites/hydro.png",
+      "powered": "assets/sprites/hydro.png",
+      "icon": "assets/sprites/hydro.png",
+      "width": 62.0,
+      "height": 52.0,
+      "anchorX": 0.5,
+      "anchorY": 0.56
+    },
+    "pole": {
+      "idle": "assets/sprites/pole-off.svg",
+      "powered": "assets/sprites/pole-on.svg",
+      "width": 19.2,
+      "height": 26.88,
+      "anchorX": 0.5,
+      "anchorY": 0.5
+    },
+    "transformer": {
+      "idle": "assets/sprites/transformator.png",
+      "powered": "assets/sprites/transformator.png",
+      "icon": "assets/sprites/transformator.png",
+      "width": 50.0,
+      "height": 43.0,
+      "anchorX": 0.5,
+      "anchorY": 0.56
+    },
+    "village": {
+      "idle": "assets/sprites/city-off.png",
+      "powered": "assets/sprites/city-on.png",
+      "icon": "assets/sprites/city-off.png",
+      "width": 54.0,
+      "height": 44.0,
+      "anchorX": 0.5,
+      "anchorY": 0.6
+    },
+    "city": {
+      "idle": "assets/sprites/city-off.png",
+      "powered": "assets/sprites/city-on.png",
+      "icon": "assets/sprites/city-off.png",
+      "width": 70.0,
+      "height": 58.0,
+      "anchorX": 0.5,
+      "anchorY": 0.6
+    },
+    "factory": {
+      "idle": "assets/sprites/factory.png",
+      "powered": "assets/sprites/factory.png",
+      "icon": "assets/sprites/factory.png",
+      "width": 67.0,
+      "height": 56.0,
+      "anchorX": 0.5,
+      "anchorY": 0.58
+    }
+  },
+  "overseer": "assets/overseer.png",
+  "intro": "data/intro.json",
+  "menu": {
+    "background": "assets/country/dark.svg",
+    "showNetworkOverlay": true,
+    "layers": []
+  }
+}
