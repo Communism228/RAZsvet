@@ -1,86 +1,109 @@
 {
   "country": {
-    "dark": "assets/country/dark.svg",
-    "light": "assets/country/light.svg"
+    "dark": "assets/country/dark.png",
+    "light": "assets/country/light.png"
   },
   "sprites": {
     "coal": {
       "idle": "assets/sprites/coal.png",
       "powered": "assets/sprites/coal.png",
       "icon": "assets/sprites/coal.png",
-      "width": 60.0,
-      "height": 56.0,
+      "width": 50.67,
+      "height": 76,
       "anchorX": 0.5,
-      "anchorY": 0.58
+      "anchorY": 0.5
     },
     "peat": {
       "idle": "assets/sprites/peat.png",
       "powered": "assets/sprites/peat.png",
       "icon": "assets/sprites/peat.png",
-      "width": 58.0,
-      "height": 55.0,
+      "width": 57.71,
+      "height": 66,
       "anchorX": 0.5,
-      "anchorY": 0.58
+      "anchorY": 0.5
     },
     "hydro": {
       "idle": "assets/sprites/hydro.png",
       "powered": "assets/sprites/hydro.png",
       "icon": "assets/sprites/hydro.png",
-      "width": 62.0,
-      "height": 52.0,
-      "anchorX": 0.5,
-      "anchorY": 0.56
-    },
-    "pole": {
-      "idle": "assets/sprites/pole-off.svg",
-      "powered": "assets/sprites/pole-on.svg",
-      "width": 19.2,
-      "height": 26.88,
+      "width": 66.8,
+      "height": 62,
       "anchorX": 0.5,
       "anchorY": 0.5
-    },
-    "transformer": {
-      "idle": "assets/sprites/transformator.png",
-      "powered": "assets/sprites/transformator.png",
-      "icon": "assets/sprites/transformator.png",
-      "width": 50.0,
-      "height": 43.0,
-      "anchorX": 0.5,
-      "anchorY": 0.56
-    },
-    "village": {
-      "idle": "assets/sprites/city-off.png",
-      "powered": "assets/sprites/city-on.png",
-      "icon": "assets/sprites/city-off.png",
-      "width": 54.0,
-      "height": 44.0,
-      "anchorX": 0.5,
-      "anchorY": 0.6
-    },
-    "city": {
-      "idle": "assets/sprites/city-off.png",
-      "powered": "assets/sprites/city-on.png",
-      "icon": "assets/sprites/city-off.png",
-      "width": 70.0,
-      "height": 58.0,
-      "anchorX": 0.5,
-      "anchorY": 0.6
     },
     "factory": {
       "idle": "assets/sprites/factory.png",
       "powered": "assets/sprites/factory.png",
       "icon": "assets/sprites/factory.png",
-      "width": 67.0,
-      "height": 56.0,
+      "width": 63.03,
+      "height": 68,
       "anchorX": 0.5,
-      "anchorY": 0.58
+      "anchorY": 0.5
+    },
+    "transformer": {
+      "idle": "assets/sprites/transformer.png",
+      "powered": "assets/sprites/transformer.png",
+      "icon": "assets/sprites/transformer.png",
+      "width": 55.92,
+      "height": 60,
+      "anchorX": 0.5,
+      "anchorY": 0.5
+    },
+    "village": {
+      "idle": "assets/sprites/village-off.png",
+      "powered": "assets/sprites/village.png",
+      "icon": "assets/sprites/village.png",
+      "width": 58.32,
+      "height": 48,
+      "anchorX": 0.5,
+      "anchorY": 0.5
+    },
+    "city": {
+      "idle": "assets/sprites/city-off.png",
+      "powered": "assets/sprites/city-on.png",
+      "icon": "assets/sprites/city-on.png",
+      "width": 57.62,
+      "height": 66,
+      "anchorX": 0.5,
+      "anchorY": 0.5
+    },
+    "pole": {
+      "idle": "assets/sprites/pole.png",
+      "powered": "assets/sprites/pole.png",
+      "width": 25.02,
+      "height": 46,
+      "anchorX": 0.5,
+      "anchorY": 0.5,
+      "icon": "assets/sprites/pole.png"
     }
   },
-  "overseer": "assets/overseer.png",
+  "overseer": "assets/ui/overseer.png",
   "intro": "data/intro.json",
   "menu": {
-    "background": "assets/country/dark.svg",
-    "showNetworkOverlay": true,
+    "background": "assets/menu/background.png",
+    "showNetworkOverlay": false,
     "layers": []
+  },
+  "ui": {
+    "settings": "assets/ui/settings.png",
+    "radio": "assets/ui/radio-off.png",
+    "coin": "assets/ui/coin.png",
+    "dialog": "assets/ui/dialog.png",
+    "timeOff": "assets/ui/timeOff.png",
+    "timeOn": "assets/ui/timeOn.png",
+    "home": "assets/ui/home.png",
+    "logo": "assets/menu/logo.png",
+    "playLabel": "assets/menu/playLabel.png",
+    "button": "assets/menu/button.png",
+    "backButton": "assets/menu/backButton.png",
+    "radioOn": "assets/ui/radio-on.png",
+    "radioOff": "assets/ui/radio-off.png",
+    "wire": "assets/ui/wire.png",
+    "destroy": "assets/ui/destroy.png",
+    "siberia": "assets/ui/Siberia.png"
+  },
+  "audio": {
+    "background": null,
+    "volume": 0.35
   }
 }

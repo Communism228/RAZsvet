@@ -6,7 +6,9 @@ const root=resolve(process.argv[2]??"standalone");
 const port=Number(process.env.PORT??4173);
 const types={".html":"text/html; charset=utf-8",".js":"text/javascript; charset=utf-8",
   ".css":"text/css; charset=utf-8",".json":"application/json; charset=utf-8",
-  ".png":"image/png",".svg":"image/svg+xml"};
+  ".png":"image/png",".svg":"image/svg+xml",".jpg":"image/jpeg",
+  ".mp3":"audio/mpeg",".wav":"audio/wav",".ogg":"audio/ogg",".opus":"audio/ogg",
+  ".m4a":"audio/mp4",".flac":"audio/flac",".otf":"font/otf",".ttf":"font/ttf"};
 http.createServer(async(req,res)=>{
   try{
     const url=new URL(req.url??"/","http://127.0.0.1");

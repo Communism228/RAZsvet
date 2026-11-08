@@ -3,3 +3,8 @@ dist/
 .test-build/
 *.log
 .DS_Store
+
+.v05-check/
+.test-build/
+__pycache__/
+*.zip

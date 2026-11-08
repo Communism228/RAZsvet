@@ -1,4 +1,5 @@
 import test from 'node:test';
+import {extname} from 'node:path';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { imageDimensions, assertSameDimensions } from '../scripts/image-dimensions.mjs';
@@ -20,12 +21,12 @@ test('percent SVG dimensions are not accepted as fixed pixel dimensions', () => 
 test('size mismatch reports both dimensions', () => {
   assert.throws(() => assertSameDimensions([173,150], [1501,1282], 'grodno'), /173 x 150 vs 1501 x 1282/);
 });
-test('country SVG files and all six masks share a 1280 x 800 pixel canvas', async () => {
+test('country images and all six masks share a 1280 x 800 pixel canvas', async () => {
   const root = new URL('../public/', import.meta.url);
   const index = JSON.parse(await readFile(new URL('data/campaign.json', root)));
   const manifest = JSON.parse(await readFile(new URL('data/assets.json', root)));
-  const dark = imageDimensions(await readFile(new URL(manifest.country.dark,root)), '.svg');
-  const light = imageDimensions(await readFile(new URL(manifest.country.light,root)), '.svg');
+  const dark = imageDimensions(await readFile(new URL(manifest.country.dark,root)), extname(manifest.country.dark));
+  const light = imageDimensions(await readFile(new URL(manifest.country.light,root)), extname(manifest.country.light));
   assert.deepEqual(dark,[1280,800]); assertSameDimensions(dark,light,'dark/light');
   assert.equal(index.regions.length,6);
   for (const file of index.regions) {

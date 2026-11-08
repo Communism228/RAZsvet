@@ -25,8 +25,8 @@ export class World {
         const s = this.balance.buildings[kind], gap = this.balance.world.clearanceM;
         for (const b of this.buildings) {
             const t = this.balance.buildings[b.kind];
-            if (Math.abs(x - b.x) < (s.widthM + t.widthM) / 2 + gap &&
-                Math.abs(y - b.y) < (s.heightM + t.heightM) / 2 + gap)
+            if (Math.abs(x - b.x) < ((s.clearanceWidthM ?? s.widthM) + (t.clearanceWidthM ?? t.widthM)) / 2 + gap &&
+                Math.abs(y - b.y) < ((s.clearanceHeightM ?? s.heightM) + (t.clearanceHeightM ?? t.heightM)) / 2 + gap)
                 return "Здания не могут перекрываться. Оставьте зазор.";
         }
     }

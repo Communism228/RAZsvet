@@ -6,99 +6,85 @@
     "v": 0.4763377212356804
   },
   "seed": 2014,
-  "map": "assets/regions/minsk/base.svg",
+  "map": "assets/regions/minsk/base.png",
   "countryMask": "assets/country/minsk-mask.png",
   "masks": {
     "water": "assets/regions/minsk/water-mask.png",
-    "hydro": "assets/regions/minsk/hydro-mask.png"
+    "hydro": "assets/regions/minsk/hydro-mask.png",
+    "blocked": "assets/regions/minsk/blocked-mask.png",
+    "spawn": "assets/regions/minsk/spawn-mask.png"
   },
   "river": null,
-  "deposits": [
-    {
-      "id": "coal-a",
-      "kind": "coal",
-      "u": 0.17,
-      "v": 0.28,
-      "radiusM": 1250
-    },
-    {
-      "id": "peat-a",
-      "kind": "peat",
-      "u": 0.24,
-      "v": 0.78,
-      "radiusM": 1400
-    },
-    {
-      "id": "coal-b",
-      "kind": "coal",
-      "u": 0.83,
-      "v": 0.31,
-      "radiusM": 1150
-    }
-  ],
+  "deposits": [],
   "spawn": {
-    "jitterM": 420,
+    "jitterM": 260,
     "settlements": [
       {
         "kind": "city",
-        "u": 0.43,
-        "v": 0.38,
+        "u": 0.434375,
+        "v": 0.82,
         "name": "Город 1"
       },
       {
         "kind": "city",
-        "u": 0.3,
-        "v": 0.24,
+        "u": 0.419375,
+        "v": 0.296,
         "name": "Город 2"
       },
       {
         "kind": "village",
-        "u": 0.73,
-        "v": 0.25,
+        "u": 0.38625,
+        "v": 0.465,
         "name": "Деревня 1"
       },
       {
         "kind": "village",
-        "u": 0.72,
-        "v": 0.68,
+        "u": 0.558125,
+        "v": 0.861,
         "name": "Деревня 2"
       },
       {
         "kind": "village",
-        "u": 0.37,
-        "v": 0.72,
+        "u": 0.396875,
+        "v": 0.155,
         "name": "Деревня 3"
       },
       {
         "kind": "village",
-        "u": 0.73,
-        "v": 0.25,
+        "u": 0.555625,
+        "v": 0.399,
         "name": "Деревня 4"
       },
       {
         "kind": "village",
-        "u": 0.72,
+        "u": 0.459375,
         "v": 0.68,
         "name": "Деревня 5"
       },
       {
         "kind": "village",
-        "u": 0.37,
-        "v": 0.72,
+        "u": 0.51375,
+        "v": 0.237,
         "name": "Деревня 6"
       }
     ],
     "factories": [
       {
-        "u": 0.71,
-        "v": 0.5,
+        "u": 0.68,
+        "v": 0.435,
         "name": "Завод 1"
       },
       {
-        "u": 0.47,
-        "v": 0.66,
+        "u": 0.675,
+        "v": 0.265,
         "name": "Завод 2"
       }
     ]
+  },
+  "countryCrop": {
+    "x": 284.5,
+    "y": 191.0,
+    "width": 693.0,
+    "height": 433.0
   }
 }

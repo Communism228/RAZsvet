@@ -14,7 +14,7 @@ export interface PaintState {
   hoverRegion:string|null;introIndex:number;introStart:number;
   transition:{regionId:string;start:number}|null;
 }
-const C={gold:"#edbd69",paper:"#f1d5aa",red:"#dc3b35",dark:"#1c2327",blue:"#9cc7cf"};
+const C={gold:"#e0bc67",paper:"#fff2d2",red:"#dc3b35",dark:"#3b3024",blue:"#fff2d2"};
 export function countryRect(width:number,height:number):View {
   const s=Math.min((width-80)/1280,(height-150)/800);
   const w=1280*s,h=800*s;
@@ -32,8 +32,18 @@ export function worldToScreen(p:Point,s:PaintState):Point {
   const v=worldView(s.width,s.height,s.campaign.balance,s.camera);
   return {x:v.x+p.x*v.scale,y:v.y+p.y*v.scale};
 }
+/** Hit visible icons instead of only the smaller ground clearance rectangle. */
+export function iconAt(p:Point,s:PaintState):Building|undefined {
+  const w=s.campaign.world;if(!w)return;
+  const k=s.campaign.balance.world.widthM/1280;
+  return [...w.buildings].sort((a,b)=>b.y-a.y).find(b=>{
+    const art=s.data.manifest.sprites[b.kind];
+    return p.x>=b.x-art.width*k*art.anchorX&&p.x<=b.x+art.width*k*(1-art.anchorX)&&
+      p.y>=b.y-art.height*k*art.anchorY&&p.y<=b.y+art.height*k*(1-art.anchorY);
+  })??w.hit(p);
+}
 function text(ctx:CanvasRenderingContext2D,t:string,x:number,y:number,size=12,color=C.paper,align:CanvasTextAlign="left"):void {
-  ctx.font=`600 ${size}px "DejaVu Sans",Arial,sans-serif`;ctx.fillStyle=color;ctx.textAlign=align;ctx.textBaseline="middle";
+  ctx.font=`600 ${size}px "RazSvetUser","RazSvetInstalled","DejaVu Sans Condensed",Arial,sans-serif`;ctx.fillStyle=color;ctx.textAlign=align;ctx.textBaseline="middle";
   ctx.fillText(t,x,y);
 }
 function wrap(ctx:CanvasRenderingContext2D,t:string,width:number):string[] {
@@ -85,31 +95,13 @@ function country(ctx:CanvasRenderingContext2D,s:PaintState):void {
 function menu(ctx:CanvasRenderingContext2D,s:PaintState):void {
   const m=s.data.manifest.menu;
   const image=s.assets.image(m?.background??s.data.manifest.country.dark)!;
-  const z=1.08+.012*Math.sin(s.time/3000);
-  ctx.save();ctx.translate(s.width/2,s.height/2);ctx.scale(z,z);
-  ctx.drawImage(image,-s.width/2,-s.height/2,s.width,s.height);ctx.restore();
-  for(const layer of m?.layers??[]){
-    const img=s.assets.image(layer.image);if(!img)continue;
-    const phase=s.time/Math.max(100,layer.periodMs??7000)*Math.PI*2;
-    ctx.save();ctx.globalAlpha=clamp(layer.opacity??1,0,1);
-    ctx.drawImage(img,Math.sin(phase)*(layer.amplitudeX??6),Math.cos(phase)*(layer.amplitudeY??4),s.width,s.height);ctx.restore();
-  }
-  const g=ctx.createLinearGradient(0,0,s.width,0);
-  g.addColorStop(0,"rgba(13,20,24,.93)");g.addColorStop(.54,"rgba(13,20,24,.7)");g.addColorStop(1,"rgba(13,20,24,.25)");
-  ctx.fillStyle=g;ctx.fillRect(0,0,s.width,s.height);
-  if(m?.showNetworkOverlay===false)return;
-  const points=[{x:s.width*.63,y:s.height*.77},{x:s.width*.76,y:s.height*.38},{x:s.width*.93,y:s.height*.67}];
-  ctx.strokeStyle="#edbd6980";ctx.lineWidth=2;ctx.beginPath();
-  points.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.stroke();
-  for(let i=0;i<points.length;i++){
-    const p=points[i];sprite(ctx,s,i===1?"pole":"factory",p.x,p.y,true,s.width/1100);
-    const r=8+(s.time/90+i*12)%35;ctx.strokeStyle=`rgba(237,189,105,${(1-(r-8)/35)*.3})`;
-    ctx.beginPath();ctx.arc(p.x,p.y,r,0,Math.PI*2);ctx.stroke();
-  }
+  const scale=Math.max(s.width/image.naturalWidth,s.height/image.naturalHeight)*(1.015+.007*Math.sin(s.time/5000));
+  const w=image.naturalWidth*scale,h=image.naturalHeight*scale;
+  ctx.drawImage(image,(s.width-w)/2,(s.height-h)/2,w,h);
 }
 function intro(ctx:CanvasRenderingContext2D,s:PaintState):void {
-  ctx.fillStyle="#d7be94";ctx.fillRect(0,0,s.width,s.height);
-  const c=s.data.intro,scale=Math.min((s.width-70)/c.width,(s.height-150)/c.height);
+  ctx.fillStyle="#121e27";ctx.fillRect(0,0,s.width,s.height);
+  const c=s.data.intro,scale=Math.min(s.width/c.width,s.height/c.height);
   const ox=(s.width-c.width*scale)/2,oy=(s.height-c.height*scale)/2;
   c.panels.forEach((p,i)=>{
     const x=ox+p.x*scale,y=oy+p.y*scale,w=p.width*scale,h=p.height*scale;
@@ -122,7 +114,7 @@ function intro(ctx:CanvasRenderingContext2D,s:PaintState):void {
     ctx.drawImage(image,x-w*(z-1)/2,y-h*(z-1)/2,w*z,h*z);
     if(p.caption){
       ctx.fillStyle="#161e23ed";ctx.fillRect(x,y+h-65*scale,w,65*scale);
-      ctx.font=`600 ${Math.max(11,16*scale)}px "DejaVu Sans",Arial`;
+      ctx.font=`600 ${Math.max(11,16*scale)}px "RazSvetUser","RazSvetInstalled","DejaVu Sans Condensed",Arial`;
       const lines=wrap(ctx,p.caption,w-28*scale);
       lines.forEach((line,j)=>text(ctx,line,x+14*scale,y+h-(lines.length-j)*20*scale-6*scale,Math.max(11,16*scale)));
     }
@@ -136,6 +128,10 @@ function region(ctx:CanvasRenderingContext2D,s:PaintState):void {
   const pos=(p:Point):Point=>({x:v.x+p.x*u,y:v.y+p.y*u});
   ctx.save();ctx.beginPath();ctx.rect(v.x,v.y,v.w,v.h);ctx.clip();
   const bg=s.assets.image(r.map);if(bg)ctx.drawImage(bg,v.x,v.y,v.w,v.h);
+  if(s.tool==="hydro"){
+    const mask=s.assets.hydroOverlays.get(r.id);
+    if(mask){ctx.globalAlpha=.48+.14*Math.sin(s.time/380);ctx.drawImage(mask,v.x,v.y,v.w,v.h);ctx.globalAlpha=1;}
+  }
   if(BUILD_KINDS.includes(s.tool as never)){
     ctx.strokeStyle="#dfc28c0d";ctx.lineWidth=1;ctx.beginPath();
     for(let x=1000;x<c.balance.world.widthM;x+=1000){ctx.moveTo(v.x+x*u,v.y);ctx.lineTo(v.x+x*u,v.y+v.h);}
@@ -170,7 +166,7 @@ function region(ctx:CanvasRenderingContext2D,s:PaintState):void {
       b.kind==="transformer"?(c.sim?.transformer.get(b.id)?.outputKW??0)>1e-6:true;
     if(s.selected===b.id||s.pending?.id===b.id){
       ctx.strokeStyle=C.gold;ctx.lineWidth=1.5;
-      ctx.strokeRect(p.x-cfg.widthM*u/2-5,p.y-cfg.heightM*u/2-5,cfg.widthM*u+10,cfg.heightM*u+10);
+      ctx.strokeRect(p.x-(cfg.clearanceWidthM??cfg.widthM)*u/2-5,p.y-(cfg.clearanceHeightM??cfg.heightM)*u/2-5,(cfg.clearanceWidthM??cfg.widthM)*u+10,(cfg.clearanceHeightM??cfg.heightM)*u+10);
     }
     const objective=isConsumer(b)&&c.isObjective(b.id);
     if(objective){
@@ -178,6 +174,7 @@ function region(ctx:CanvasRenderingContext2D,s:PaintState):void {
       planGlow.addColorStop(0,full?"#ff9b8f55":"#ff544855");
       planGlow.addColorStop(1,"#ff544800");ctx.fillStyle=planGlow;
       ctx.fillRect(p.x-58*scale,p.y-58*scale,116*scale,116*scale);
+      ctx.strokeStyle="#ee6457";ctx.lineWidth=1.5;ctx.beginPath();ctx.ellipse(p.x,p.y+15*scale,27*scale,10*scale,0,0,Math.PI*2);ctx.stroke();
     }
     if(full){
       const glow=ctx.createRadialGradient(p.x,p.y,2,p.x,p.y,50*scale);
@@ -192,12 +189,13 @@ function region(ctx:CanvasRenderingContext2D,s:PaintState):void {
         text(ctx,port==="in"?"ВН":"НН",ep.x,ep.y-13,8,port==="in"?C.gold:C.blue,"center");
       }
     }
-    const y=p.y+cfg.heightM*u/2+11,short=b.kind==="factory"?`ЗАВОД ${w.buildings.filter(x=>x.kind==="factory").indexOf(b)+1}`:
+    const art=s.data.manifest.sprites[b.kind];
+    const y=p.y+art.height*scale*(1-art.anchorY)+11,short=b.kind==="factory"?`ЗАВОД ${w.buildings.filter(x=>x.kind==="factory").indexOf(b)+1}`:
       b.name|| (b.kind==="pole"?(b.voltage==="hv"?"ВН":"НН"):b.kind==="transformer"?"10 кВ → 400 В":NAMES[b.kind]);
     if(b.kind!=="pole"||s.selected===b.id){
-      ctx.font='600 10px "DejaVu Sans",Arial';const tw=ctx.measureText(short).width;
-      ctx.fillStyle="#182024da";ctx.fillRect(p.x-tw/2-5,y-7,tw+10,15);
-      text(ctx,short,p.x,y,10,isConsumer(b)?full?C.gold:C.paper:"#c9b797","center");
+      ctx.font='600 15px "RazSvetUser","RazSvetInstalled","DejaVu Sans Condensed",Arial';const tw=ctx.measureText(short).width;
+      ctx.fillStyle="#3c3029da";ctx.fillRect(p.x-tw/2-5,y-7,tw+10,15);
+      text(ctx,short,p.x,y,15,isConsumer(b)?full?C.gold:C.paper:"#c9b797","center");
     }else {
       text(ctx,b.voltage==="hv"?"ВН":"НН",p.x+10,p.y+11,8,b.voltage==="hv"?C.gold:C.blue);
     }
@@ -219,7 +217,7 @@ function region(ctx:CanvasRenderingContext2D,s:PaintState):void {
       ctx.globalAlpha=.6;sprite(ctx,s,kind,s.mouse.x,s.mouse.y,false,u*c.balance.world.widthM/1280);ctx.globalAlpha=1;
     }
     if(s.tool==="cable"&&s.pending){
-      const a=pos(w.endpointPosition(s.pending)),target=w.hit(mouse);
+      const a=pos(w.endpointPosition(s.pending)),target=iconAt(mouse,s);
       const end=target?w.endpointAt(target,mouse):null;
       const error=end?w.connectionError(s.pending,end):undefined;
       const b=end?pos(w.endpointPosition(end)):s.mouse;
@@ -230,7 +228,7 @@ function region(ctx:CanvasRenderingContext2D,s:PaintState):void {
     }
   }
   ctx.restore();
-  const sx=95,sy=s.height-142,len=2000*u;
+  const sx=158,sy=s.height-142,len=2000*u;
   ctx.strokeStyle="#dfc18d";ctx.lineWidth=1.5;ctx.beginPath();
   ctx.moveTo(sx,sy-4);ctx.lineTo(sx,sy);ctx.lineTo(sx+len,sy);ctx.lineTo(sx+len,sy-4);ctx.stroke();
   text(ctx,"2 км",sx+len/2,sy-13,10,"#dfc18d","center");
@@ -240,7 +238,16 @@ export function paint(ctx:CanvasRenderingContext2D,s:PaintState):void {
   if(s.phase==="menu")menu(ctx,s);
   else if(s.phase==="intro")intro(ctx,s);
   else if(s.phase==="region")region(ctx,s);
+  else if(s.phase==="result"&&s.campaign.status==="failed"){
+    const path=s.data.manifest.ui?.siberia,im=path?s.assets.image(path):undefined;
+    if(im){
+      const scale=Math.max(s.width/im.naturalWidth,s.height/im.naturalHeight);
+      const w=im.naturalWidth*scale,h=im.naturalHeight*scale;
+      ctx.drawImage(im,(s.width-w)/2,(s.height-h)/2,w,h);
+    }
+  }
+  else if(s.phase==="result"&&s.campaign.status==="reprimand")region(ctx,s);
   else country(ctx,s);
-  if(s.phase==="result"){ctx.fillStyle="#10171bbd";ctx.fillRect(0,0,s.width,s.height);}
+  if(s.phase==="result"){ctx.fillStyle=s.campaign.status==="failed"?"#51443218":"#2a241b60";ctx.fillRect(0,0,s.width,s.height);}
   ctx.restore();
 }

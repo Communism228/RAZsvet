@@ -1,0 +1,92 @@
+[
+  {
+    "source": "wire.png",
+    "target": "assets/ui/wire.png",
+    "original": [
+      2880,
+      1800
+    ],
+    "crop": [
+      249,
+      134,
+      2452,
+      1585
+    ],
+    "result": [
+      268,
+      181
+    ]
+  },
+  {
+    "source": "destroy.png",
+    "target": "assets/ui/destroy.png",
+    "original": [
+      2880,
+      1800
+    ],
+    "crop": [
+      833,
+      250,
+      1809,
+      1273
+    ],
+    "result": [
+      256,
+      268
+    ]
+  },
+  {
+    "source": "radio_on.png",
+    "target": "assets/ui/radio-on.png",
+    "original": [
+      2481,
+      3508
+    ],
+    "crop": [
+      317,
+      415,
+      2322,
+      2745
+    ],
+    "result": [
+      356,
+      412
+    ]
+  },
+  {
+    "source": "radio_off.png",
+    "target": "assets/ui/radio-off.png",
+    "original": [
+      2481,
+      3508
+    ],
+    "crop": [
+      317,
+      415,
+      2322,
+      2745
+    ],
+    "result": [
+      356,
+      412
+    ]
+  },
+  {
+    "source": "Power_line.png",
+    "target": "assets/sprites/pole.png",
+    "original": [
+      2481,
+      3508
+    ],
+    "crop": [
+      526,
+      382,
+      2004,
+      3149
+    ],
+    "result": [
+      285,
+      524
+    ]
+  }
+]

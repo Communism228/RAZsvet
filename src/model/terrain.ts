@@ -60,7 +60,7 @@ export class Terrain {
       if (this.sample(name,x-w/2+w*ix/nx,y-h/2+h*iy/ny)) return true;
     return false;
   }
-  placementError(kind: Kind,x: number,y: number): string | undefined {
+  placementError(kind: Kind,x: number,y: number,ignoreResource=false): string | undefined {
     const s=this.balance.buildings[kind],world=this.balance.world;
     if (x-s.widthM/2<0 || y-s.heightM/2<0 ||
         x+s.widthM/2>world.widthM || y+s.heightM/2>world.heightM)
@@ -69,7 +69,7 @@ export class Terrain {
     if (kind==="hydro") {
       if (!this.sample("hydro",x,y)) return "ГЭС: поставьте центральную точку на разрешённый участок реки.";
     } else if (this.touches("water",x,y,s.widthM,s.heightM)) return "Это вода. Наземные здания и опоры ставятся на суше.";
-    if (kind==="coal" || kind==="peat") {
+    if (!ignoreResource && (kind==="coal" || kind==="peat")) {
       if (!this.region.deposits.some(d=>d.kind===kind &&
         Math.hypot(x-d.u*world.widthM,y-d.v*world.heightM)<=d.radiusM))
         return kind==="coal" ? "Угольная ТЭС строится внутри угольного месторождения." : "Торфяная ТЭС строится внутри торфяного болота.";

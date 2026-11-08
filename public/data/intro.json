@@ -1,64 +1,64 @@
 {
-  "width": 4724,
-  "height": 7087,
+  "width": 1611,
+  "height": 1800,
   "fadeMs": 650,
   "fullPageLayers": true,
   "panels": [
     {
-      "image": "assets/intro/1-base.png",
+      "image": "assets/intro/1.png",
       "caption": "",
       "x": 0,
       "y": 0,
-      "width": 4724,
-      "height": 7087
+      "width": 1611,
+      "height": 1800
     },
     {
-      "image": "assets/intro/2-base.png",
+      "image": "assets/intro/2.png",
       "caption": "",
       "x": 0,
       "y": 0,
-      "width": 4724,
-      "height": 7087
+      "width": 1611,
+      "height": 1800
     },
     {
-      "image": "assets/intro/3-base.png",
+      "image": "assets/intro/3.png",
       "caption": "",
       "x": 0,
       "y": 0,
-      "width": 4724,
-      "height": 7087
+      "width": 1611,
+      "height": 1800
     },
     {
-      "image": "assets/intro/4-base.png",
+      "image": "assets/intro/4.png",
       "caption": "",
       "x": 0,
       "y": 0,
-      "width": 4724,
-      "height": 7087
+      "width": 1611,
+      "height": 1800
     },
     {
-      "image": "assets/intro/5-base.png",
+      "image": "assets/intro/5.png",
       "caption": "",
       "x": 0,
       "y": 0,
-      "width": 4724,
-      "height": 7087
+      "width": 1611,
+      "height": 1800
     },
     {
-      "image": "assets/intro/6-base.png",
+      "image": "assets/intro/6.png",
       "caption": "",
       "x": 0,
       "y": 0,
-      "width": 4724,
-      "height": 7087
+      "width": 1611,
+      "height": 1800
     },
     {
-      "image": "assets/intro/7-base.png",
+      "image": "assets/intro/7.png",
       "caption": "",
       "x": 0,
       "y": 0,
-      "width": 4724,
-      "height": 7087
+      "width": 1611,
+      "height": 1800
     }
   ]
 }

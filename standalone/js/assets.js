@@ -42,6 +42,7 @@ export async function loadData() {
 export class Assets {
     data;
     images = new Map();
+    hydroOverlays = new Map();
     litRegions = new Map();
     constructor(data) {
         this.data = data;
@@ -66,6 +67,8 @@ export class Assets {
         const m = this.data.manifest;
         const paths = new Set([m.country.dark, m.country.light, m.overseer, ...this.data.intro.panels.map(p => p.image),
             ...this.data.regions.map(r => r.countryMask)]);
+        for (const path of Object.values(m.ui ?? {}))
+            paths.add(path);
         if (m.menu) {
             paths.add(m.menu.background);
             for (const layer of m.menu.layers ?? [])
@@ -126,6 +129,17 @@ export class Assets {
             for (let i = 0; i < pixels.length; i++)
                 pixels[i] = rgba[i * 4 + 3] >= 128 && rgba[i * 4] >= 128 ? 255 : 0;
             masks[name] = new Mask(c.width, c.height, pixels);
+            if (name === "hydro") {
+                const data = ctx.createImageData(c.width, c.height);
+                for (let i = 0; i < pixels.length; i++) {
+                    data.data[i * 4] = 110;
+                    data.data[i * 4 + 1] = 239;
+                    data.data[i * 4 + 2] = 255;
+                    data.data[i * 4 + 3] = pixels[i];
+                }
+                ctx.putImageData(data, 0, 0);
+                this.hydroOverlays.set(region.id, c);
+            }
         }
         return new Terrain(region, balance, masks);
     }

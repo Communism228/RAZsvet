@@ -40,6 +40,7 @@ export async function loadData(): Promise<GameData> {
 }
 export class Assets {
   private images=new Map<string,HTMLImageElement>();
+  readonly hydroOverlays=new Map<string,HTMLCanvasElement>();
   readonly litRegions=new Map<string,HTMLCanvasElement>();
   constructor(readonly data: GameData) {}
   image(path: string): HTMLImageElement|undefined { return this.images.get(path); }
@@ -54,6 +55,7 @@ export class Assets {
     const m=this.data.manifest;
     const paths=new Set([m.country.dark,m.country.light,m.overseer,...this.data.intro.panels.map(p=>p.image),
       ...this.data.regions.map(r=>r.countryMask)]);
+    for(const path of Object.values(m.ui??{}))paths.add(path);
     if(m.menu){paths.add(m.menu.background);for(const layer of m.menu.layers??[])paths.add(layer.image);}
     for(const s of Object.values(m.sprites)){paths.add(s.idle);if(s.powered)paths.add(s.powered);if(s.icon)paths.add(s.icon);}
     await Promise.all([...paths].map(p=>this.loadImage(p)));
@@ -91,6 +93,11 @@ export class Assets {
       const rgba=ctx.getImageData(0,0,c.width,c.height).data,pixels=new Uint8Array(c.width*c.height);
       for(let i=0;i<pixels.length;i++)pixels[i]=rgba[i*4+3]>=128&&rgba[i*4]>=128?255:0;
       masks[name]=new Mask(c.width,c.height,pixels);
+      if(name==="hydro"){
+        const data=ctx.createImageData(c.width,c.height);
+        for(let i=0;i<pixels.length;i++){data.data[i*4]=110;data.data[i*4+1]=239;data.data[i*4+2]=255;data.data[i*4+3]=pixels[i];}
+        ctx.putImageData(data,0,0);this.hydroOverlays.set(region.id,c);
+      }
     }
     return new Terrain(region,balance,masks);
   }

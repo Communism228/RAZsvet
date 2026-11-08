@@ -1,6 +1,6 @@
 {
-  "name": "electrification-campaign",
-  "version": "0.4.1",
+  "name": "raz-svet",
+  "version": "0.6.0",
   "private": true,
   "type": "module",
   "engines": {

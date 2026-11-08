@@ -5,18 +5,19 @@ import { validateBalance } from "./model/settings.js";
 import { Terrain } from "./model/terrain.js";
 import { BUILD_KINDS,NAMES,SHORT,clamp,isConsumer,isPlant,label,voltageOf,
   type Balance,type BuildKind,type Endpoint,type Point,type Tool,type Voltage } from "./model/types.js";
-import { paint,countryRect,screenToWorld,worldView,type Camera,type PaintState,type Phase } from "./render/paint.js";
+import { paint,countryRect,screenToWorld,worldView,iconAt,type Camera,type PaintState,type Phase } from "./render/paint.js";
 import type { Surface } from "./render/surface.js";
 import { Audio } from "./ui/audio.js";
+import { Typography } from "./ui/typography.js";
 
-const SAVE="electrification-campaign-v4";
+const SAVE="raz-svet-campaign-v6";
 const months=["ЯНВ","ФЕВ","МАР","АПР","МАЙ","ИЮН","ИЮЛ","АВГ","СЕН","ОКТ","НОЯ","ДЕК"];
 const e=(s:unknown):string=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]!));
 const n=(value:number,digits=1):string=>value.toLocaleString("ru-RU",{maximumFractionDigits:digits});
 const monthsWord=(m:number):string=>{const mod10=m%10,mod100=m%100;return mod10===1&&mod100!==11?"месяц":mod10>=2&&mod10<=4&&(mod100<12||mod100>14)?"месяца":"месяцев";};
 const order:Tool[]=["coal","peat","hydro","transformer","pole","cable","delete"];
 const titles:Record<string,string>={coal:"УГОЛЬНАЯ ТЭС",peat:"ТОРФЯНАЯ ТЭС",hydro:"ГЭС",transformer:"ТРАНСФОРМАТОР",pole:"ОПОРА ЛЭП",cable:"КАБЕЛЬ",delete:"ДЕМОНТАЖ"};
-type Modal="matrix"|"help"|"dev"|null;
+type Modal="matrix"|"help"|"dev"|"settings"|null;
 
 export class App {
   phase:Phase="menu";
@@ -43,8 +44,10 @@ export class App {
   private shownMessage=-1;
   private messageUntil=0;
   private space=false;
+  private cameraKeys=new Set<string>();
   private drag:{x:number;y:number;cameraX:number;cameraY:number;pan:boolean;distance:number}|null=null;
   private audio=new Audio();
+  private typography=new Typography();
   private dev=new URLSearchParams(location.search).get("dev")==="1";
   private test=new URLSearchParams(location.search).get("test")==="1";
 
@@ -55,7 +58,12 @@ export class App {
     this.ui=document.createElement("div");this.ui.id="ui";root.append(this.ui);
     this.toastEl=document.createElement("div");this.toastEl.id="toast";this.toastEl.setAttribute("role","status");root.append(this.toastEl);
     try{const raw=localStorage.getItem(SAVE);if(raw)this.saved=JSON.parse(raw) as CampaignSave;}catch{this.saved=null;}
+    for(const [name,path] of Object.entries(this.data.manifest.ui??{}))
+      this.root.style.setProperty(`--art-${name}`,`url("${new URL(path,document.baseURI).href}")`);
+    this.audio.configure(data.manifest.audio?.background??null,data.manifest.audio?.volume??.35);
+    this.audio.onError=()=>{this.notify("Не удалось воспроизвести трек. Выберите другой аудиофайл в настройках.",true);this.updateHUD();};
     this.bind();this.resize();this.renderUI();
+    void Promise.all([this.audio.restore(),this.typography.restore()]).then(()=>{if(this.modal==="settings")this.renderUI();});
     if(this.test)Object.defineProperty(window,"__game",{value:this,configurable:true});
     requestAnimationFrame(this.tick);
   }
@@ -70,6 +78,13 @@ export class App {
       if(this.phase==="transition"&&this.preparedTerrain&&this.transition&&now-this.transition.start>=1050){
         const t=this.preparedTerrain;this.preparedTerrain=null;this.transition=null;
         this.campaign.begin(t.region,t);this.enterBoard();this.save();
+      }
+      if(this.phase==="region"&&!this.modal&&!this.campaign.paused){
+        const speed=600*Math.min(dt,.05)/worldView(this.width,this.height,this.balance,this.camera).scale;
+        const held=(...keys:string[])=>keys.some(k=>this.cameraKeys.has(k))?1:0;
+        this.camera.x+=(held("KeyD","ArrowRight")-held("KeyA","ArrowLeft"))*speed;
+        this.camera.y+=(held("KeyS","ArrowDown")-held("KeyW","ArrowUp"))*speed;
+        this.clampCamera();
       }
       if(this.phase==="region"&&!document.hidden){
         const outcome=this.campaign.advance(dt);
@@ -106,6 +121,13 @@ export class App {
   private bind():void {
     window.addEventListener("resize",this.resize);
     this.ui.addEventListener("click",event=>{
+      const mini=(event.target as HTMLElement).closest<HTMLElement>(".mini-map");
+      if(mini&&this.phase==="region"){
+        const r=mini.getBoundingClientRect();
+        this.camera.x=(event.clientX-r.left)/r.width*this.balance.world.widthM;
+        this.camera.y=(event.clientY-r.top)/r.height*this.balance.world.heightM;
+        this.clampCamera();return;
+      }
       const target=(event.target as HTMLElement).closest<HTMLElement>("[data-action]");
       if(target)void this.action(target.dataset.action!,target).catch(error=>this.failSafely(error));
     });
@@ -116,8 +138,19 @@ export class App {
     this.ui.addEventListener("pointerout",event=>{
       if((event.target as HTMLElement).closest("[data-region]"))this.hoverRegion=null;
     });
+    this.ui.addEventListener("change",event=>{
+      const fileInput=event.target as HTMLInputElement;
+      if(["font-file","music-file"].includes(fileInput.id)){
+        const file=fileInput.files?.[0];if(file)void this.importMedia(fileInput.id,file);return;
+      }
+      const input=event.target as HTMLSelectElement;
+      if(input.id!=="resource-mode")return;
+      const area=this.ui.querySelector<HTMLTextAreaElement>("#balance-json");if(!area)return;
+      try{const b=JSON.parse(area.value);b.resources.mode=input.value;area.value=JSON.stringify(b,null,2);}catch{}
+    });
     this.ui.addEventListener("input",event=>{
       const input=event.target as HTMLInputElement,path=input.dataset.balancePath;
+      if(input.id==="music-volume"){this.audio.setVolume(Number(input.value));return;}
       if(!path)return;
       const area=this.ui.querySelector<HTMLTextAreaElement>("#balance-json");
       if(!area)return;
@@ -135,7 +168,7 @@ export class App {
     };
     canvas.addEventListener("pointerdown",event=>{
       if(event.button===2){this.pending=null;this.renderUI();return;}
-      const p=point(event),pan=this.phase==="region"&&(event.button===1||(event.button===0&&this.space));
+      const p=point(event),pan=this.phase==="region"&&(event.button===1||(event.button===0&&(this.space||this.tool==="inspect")));
       this.drag={x:p.x,y:p.y,cameraX:this.camera.x,cameraY:this.camera.y,pan,distance:0};
       if(event.button===0||pan){canvas.setPointerCapture(event.pointerId);event.preventDefault();}
     });
@@ -153,20 +186,28 @@ export class App {
     canvas.addEventListener("pointerup",event=>{
       const d=this.drag;this.drag=null;
       if(canvas.hasPointerCapture(event.pointerId))canvas.releasePointerCapture(event.pointerId);
-      if(event.button===0&&d&&!d.pan&&d.distance<6)this.boardClick(point(event),event.shiftKey);
+      if(event.button===0&&d&&(!d.pan||this.tool==="inspect"&&!this.space)&&d.distance<6)this.boardClick(point(event),event.shiftKey);
     });
     canvas.addEventListener("pointercancel",()=>{this.drag=null;});
     canvas.addEventListener("pointerleave",()=>{if(!this.drag)this.mouse=null;});
     canvas.addEventListener("contextmenu",event=>event.preventDefault());
     canvas.addEventListener("wheel",event=>{
       if(this.phase!=="region"||this.modal)return;
-      event.preventDefault();this.camera.zoom*=Math.exp(-event.deltaY*.0012);this.clampCamera();
+      event.preventDefault();
+      const p=point(event),before=screenToWorld(p,this.state());
+      this.camera.zoom*=Math.exp(-event.deltaY*.0012);this.clampCamera();
+      const after=screenToWorld(p,this.state());
+      this.camera.x+=before.x-after.x;this.camera.y+=before.y-after.y;this.clampCamera();
     },{passive:false});
     window.addEventListener("keydown",event=>{
       if((event.target as HTMLElement).matches("input,textarea,select"))return;
       if(this.phase==="intro"&&["Space","Enter"].includes(event.code)){event.preventDefault();this.nextPanel();return;}
       if(this.phase!=="region")return;
       if(event.code==="Space"){this.space=true;event.preventDefault();}
+      if(["KeyW","KeyA","KeyS","KeyD","ArrowLeft","ArrowRight","ArrowUp","ArrowDown"].includes(event.code)){
+        if(!this.modal)this.cameraKeys.add(event.code);event.preventDefault();return;
+      }
+      if(event.repeat)return;
       if(event.code==="Escape"){
         if(this.modal)this.closeModal();
         else if(this.pending){this.pending=null;this.renderUI();}
@@ -187,9 +228,9 @@ export class App {
       if(["Minus","NumpadSubtract"].includes(event.code)){this.camera.zoom/=1.15;this.clampCamera();}
       if(event.code==="Home"){this.camera={x:this.balance.world.widthM/2,y:this.balance.world.heightM/2,zoom:1};}
     });
-    window.addEventListener("keyup",event=>{if(event.code==="Space")this.space=false;});
+    window.addEventListener("keyup",event=>{if(event.code==="Space")this.space=false;this.cameraKeys.delete(event.code);});
     const loseFocus=()=>{
-      this.space=false;this.drag=null;
+      this.space=false;this.drag=null;this.cameraKeys.clear();
       if(this.phase==="region"&&!this.campaign.paused){
         this.campaign.paused=true;this.save();this.renderUI();
       }
@@ -202,10 +243,14 @@ export class App {
   private async action(action:string,target:HTMLElement):Promise<void> {
     if(action==="play"){await this.play();return;}
     if(action==="new"){this.newGame();return;}
-    if(action==="menu"){this.phase="menu";this.modal=null;this.renderUI();return;}
+    if(action==="menu"){this.campaign.paused=true;this.save();this.phase="menu";this.modal=null;this.renderUI();return;}
     if(action==="skip"){this.phase="country";this.save();this.renderUI();return;}
     if(action==="next-panel"){this.nextPanel();return;}
     if(action==="region"){await this.startRegion(target.dataset.region!);return;}
+    if(action==="retry-plan"){this.campaign.retry();this.phase="region";this.shownMessage=-1;this.messageUntil=0;this.last=performance.now();this.save();this.renderUI();return;}
+    if(action==="settings"){this.openModal("settings");return;}
+    if(action==="reset-music"){await this.audio.reset();this.renderUI();return;}
+    if(action==="reset-font"){await this.typography.reset();this.renderUI();return;}
     if(action==="next-region"){this.phase="country";this.renderUI();return;}
     if(action==="tool"){this.selectTool(target.dataset.tool as Tool);return;}
     if(action==="voltage"){this.poleVoltage=this.poleVoltage==="hv"?"lv":"hv";this.renderUI();return;}
@@ -217,7 +262,11 @@ export class App {
     if(action==="zoom-in"){this.camera.zoom*=1.15;this.clampCamera();return;}
     if(action==="zoom-out"){this.camera.zoom/=1.15;this.clampCamera();return;}
     if(action==="home"){this.camera={x:this.balance.world.widthM/2,y:this.balance.world.heightM/2,zoom:1};return;}
-    if(action==="sound"){this.audio.enabled=!this.audio.enabled;this.audio.tone();this.renderUI();return;}
+    if(action==="sound"){
+      if(!this.audio.hasTrack){this.openModal("settings");this.notify("Выберите фоновую музыку: MP3, OGG, WAV или M4A.");return;}
+      try{await this.audio.toggle();}catch{this.notify("Музыка не запустилась. Проверьте файл или нажмите радио ещё раз.",true);}
+      if(this.modal==="settings")this.renderUI();else this.updateHUD();return;
+    }
     if(action==="inspect"){this.selectTool("inspect");return;}
     if(action==="matrix-cable"){this.selected=target.dataset.key!;this.closeModal();return;}
     if(action==="apply-balance"||action==="export-balance"){
@@ -232,7 +281,7 @@ export class App {
     }
   }
   private async play():Promise<void> {
-    if(this.saved&&["map","playing"].includes(this.saved.status)){
+    if(this.saved&&["map","playing","reprimand"].includes(this.saved.status)){
       try{
         let terrain:Terrain|undefined;
         if(this.saved.active){
@@ -241,7 +290,8 @@ export class App {
           this.notify("Загрузка сохранённого региона…");terrain=await this.assets.terrain(region,this.balance);
         }
         this.campaign=Campaign.restore(this.saved,this.balance,this.data.regions,terrain);
-        if(this.campaign.status==="playing")this.enterBoard();
+        if(this.campaign.status==="reprimand"){this.phase="result";this.renderUI();}
+        else if(this.campaign.status==="playing")this.enterBoard();
         else {this.phase="country";this.renderUI();}
         return;
       }catch(error){this.saved=null;this.notify(error instanceof Error?error.message:String(error),true);}
@@ -270,7 +320,7 @@ export class App {
   }
   private enterBoard():void {
     this.phase="region";this.tool="inspect";this.selected=null;this.pending=null;this.mouse=null;
-    this.camera={x:this.balance.world.widthM/2,y:this.balance.world.heightM/2,zoom:1};
+    this.camera={x:this.balance.world.widthM/2,y:this.balance.world.heightM/2,zoom:this.balance.world.initialZoom??1.7};
     this.modal=null;this.shownMessage=-1;this.messageUntil=0;this.last=performance.now();
     this.renderUI();
   }
@@ -286,7 +336,7 @@ export class App {
     try{
       if(this.phase==="intro"){this.nextPanel();return;}
       if(this.phase!=="region"||this.campaign.paused||this.modal||!this.campaign.world)return;
-      const w=this.campaign.world,point=screenToWorld(p,this.state()),b=w.hit(point);
+      const w=this.campaign.world,point=screenToWorld(p,this.state()),b=iconAt(point,this.state());
       if(this.tool==="inspect"){this.selected=b?.id??w.cableAt(point)?.key??null;this.renderUI();return;}
       if(this.tool==="delete"){
         const cable=w.cableAt(point);
@@ -320,11 +370,11 @@ export class App {
   private openModal(modal:Modal):void {
     if(this.modal)this.closeModal();
     this.modalWasPaused=this.campaign.paused;
-    if(modal==="dev"||modal==="help")this.campaign.paused=true;
+    if(modal==="dev"||modal==="help"||modal==="settings")this.campaign.paused=true;
     this.modal=modal;this.renderUI();
   }
   private closeModal():void {
-    if(this.modal==="help"||this.modal==="dev")this.campaign.paused=this.modalWasPaused;
+    if(this.modal==="help"||this.modal==="dev"||this.modal==="settings")this.campaign.paused=this.modalWasPaused;
     this.modal=null;this.last=performance.now();this.renderUI();
   }
   private save():void {
@@ -361,8 +411,8 @@ export class App {
       const power=this.campaign.sim?.consumerKW.get(b.id)??0;
       const plan=this.campaign.objectives.find(o=>o.id===b.id);
       detail=`Получено ${n(power)} / ${n(b.demandKW)} кВт · ${n(power/b.demandKW*100)}%<br>`+
-        (plan?`<strong>Госплан:</strong> объект должен быть запитан к сроку.`:(b.kind==="factory"?"Промышленный объект. Дохода не приносит.":`Доход при полном питании: ${n(b.incomePerSec)} ₽/с`))+
-        (b.kind!=="factory"?`<br>Доход при полном питании: ${n(b.incomePerSec)} ₽/с`:" Дохода не приносит.");
+        (plan?`<strong>Госплан:</strong> объект должен быть запитан к сроку.<br>`:"")+
+        (b.kind!=="factory"?`Доход при полном питании: ${n(b.incomePerSec)} ₽/с`:"Промышленный объект. Дохода не приносит.");
     }else if(b.kind==="transformer")detail=`10 000 В → 400 В · КПД ${n(b.efficiency*100)}%<br>Выход ${n(this.campaign.sim?.transformer.get(b.id)?.outputKW??0)} / ${n(b.outputLimitKW)} кВт`;
     else detail=`Опора ${b.voltage==="hv"?"10 кВ":"400 В"}. Только одно напряжение; преобразования нет.`;
     return `<aside class="inspector"><div class="eyebrow">${e(label(b))} / ${e(NAMES[b.kind])}</div>
@@ -372,10 +422,12 @@ export class App {
   private toolHint():string {
     if(this.tool==="cable")return this.pending?"Теперь выберите второй конец. Shift — продолжить цепочку через опору.":"Кликните по двум зданиям. ВН: жёлтый порт; НН: голубой. Напряжения должны совпадать.";
     if(this.tool==="delete")return `Удалите своё здание или кабель. Возврат ${n(this.balance.economy.refundFraction*100)}% уплаченной цены. Поселения и заводы защищены.`;
-    if(this.tool==="inspect")return "Подключите поселения для дохода, затем обеспечьте все отмеченные госпланы. Нажмите ? для схемы подключения.";
+    if(this.tool==="inspect")return "Подключите поселения для дохода, затем обеспечьте все отмеченные госпланы. Схема подключения — в настройках.";
     if(this.tool==="pole")return `Опора ${this.poleVoltage==="hv"?"10 кВ":"400 В"} · V меняет тип · кабель можно провести над водой.`;
     if(this.tool==="transformer")return "Трансформатор: вход 10 кВ слева, выход 400 В справа. Ставьте ближе к потребителю.";
     if(this.tool==="hydro")return "ГЭС: центр здания должен находиться на разрешённой реке.";
+    if((this.tool==="coal"||this.tool==="peat")&&!this.campaign.region?.deposits.some(d=>d.kind===this.tool))
+      return "В этой области нет этого ресурса. Выберите другую станцию или ГЭС.";
     return this.tool==="coal"?"Угольная ТЭС: внутри зоны угольного месторождения.":"Торфяная ТЭС: внутри зоны торфяного болота.";
   }
   private matrix():string {
@@ -394,7 +446,38 @@ export class App {
       <p>Длинная линия требует промежуточных опор. Тип опоры переключается <kbd>V</kbd>. Вход трансформатора слева, выход справа. Потребители и станции не передают чужую мощность.</p>
       <p>Поселения при 100% питания дают деньги каждую секунду. Отмеченные красным свечением госпланы должны иметь полное питание <strong>одновременно в момент окончания срока</strong>. Заводы не приносят доход, а города и деревни продолжают приносить его как обычно.</p>
       <p>Колесо — масштаб. Средняя кнопка или пробел + перетаскивание — камера. <kbd>0</kbd> — выбор, <kbd>1–7</kbd> — инструменты, <kbd>M</kbd> — матрица, <kbd>Esc</kbd> — отмена или пауза.</p>
+      <p>За сорванный срок региона начисляется одно нарушение. Первые два — штраф и новый срок в том же регионе, без потери сети. Третье за всю кампанию — командировка в Сибирь.</p>
       <p class="muted">Пока эта справка открыта, время и доход остановлены.</p><button class="primary" data-action="close">К РАБОТЕ</button></section></div>`;
+  }
+  private async importMedia(kind:string,file:File):Promise<void>{
+    try{
+      const persisted=kind==="font-file"?await this.typography.import(file):await this.audio.import(file);
+      this.notify(kind==="font-file"?
+        "Шрифт применён ко всему интерфейсу.":
+        "Трек выбран. Нажмите радио, чтобы включить музыку.");
+      if(!persisted)this.notify("Файл загружен. Браузер не дал сохранить его: после перезапуска выберите файл повторно.");
+    }catch(error){this.notify("Не удалось загрузить файл: "+(error instanceof Error?error.message:String(error)),true);}
+    if(this.modal==="settings")this.renderUI();
+  }
+  private settingsPanel():string {
+    return `<div class="modal-backdrop"><section class="dialog settings-dialog" role="dialog" aria-label="Настройки">
+      <button class="close" data-action="close" aria-label="Закрыть">×</button>
+      <div class="eyebrow">РАЗ, СВЕТ!</div><h2>Настройки</h2>
+      <section class="setting-block"><h3>Радио и фоновая музыка</h3>
+        <p>${e(this.audio.trackName||"Трек не выбран")}</p>
+        <label class="file-choice">Выбрать аудиофайл<input id="music-file" type="file" accept="audio/*,.mp3,.ogg,.wav,.m4a,.flac,.opus"></label>
+        <label class="volume-label">Громкость<input id="music-volume" type="range" min="0" max="1" step=".01" value="${this.audio.volume}"></label>
+        <div class="button-row"><button data-action="sound" ${this.audio.hasTrack?"":"disabled"}>${this.audio.enabled?"Выключить радио":"Включить радио"}</button><button data-action="reset-music" class="text-button">Убрать трек</button></div>
+        <p class="setting-note">Музыка играет по кругу. Картинка радио показывает наличие объявления; значок ♫ — работу музыки.</p>
+      </section>
+      <section class="setting-block"><h3>Шрифт Rodchenko</h3>
+        <p>${e(this.typography.active?this.typography.name:"Выберите ваш ZIP со шрифтами или отдельный OTF/TTF.")}</p>
+        <label class="file-choice">Загрузить шрифт<input id="font-file" type="file" accept=".zip,.otf,.ttf,.woff,.woff2"></label>
+        <button data-action="reset-font" class="text-button">Сбросить шрифт</button>
+        <p class="setting-note">Шрифт и трек хранятся в этом браузере. Файлы никуда не отправляются.</p>
+      </section>
+      <div class="button-row"><button class="primary" data-action="close">Готово</button><button data-action="help">Правила и управление</button></div>
+      </section></div>`;
   }
   private developerPanel():string {
     const fields:[string,string,number][]=[
@@ -405,27 +488,44 @@ export class App {
       ["Рост цен (0.08 = 8%)","campaign.priceGrowth",this.balance.campaign.priceGrowth],
       ["Цена угольной ТЭС","buildings.coal.price",this.balance.buildings.coal.price],
       ["Мощность угольной, кВт","buildings.coal.generationKW",this.balance.buildings.coal.generationKW!],
-      ["Доход деревни, ₽/с","buildings.village.incomePerSec",this.balance.buildings.village.incomePerSec!]
+      ["Доход деревни, ₽/с","buildings.village.incomePerSec",this.balance.buildings.village.incomePerSec!],
+      ["Первый штраф","penalties.fine",this.campaign.penaltyRules.fine],
+      ["Рост штрафа","penalties.fineGrowth",this.campaign.penaltyRules.fineGrowth],
+      ["Срок на исправление, с","penalties.retrySeconds",this.campaign.penaltyRules.retrySeconds],
+      ["Масштаб при входе","world.initialZoom",this.balance.world.initialZoom??1.7],
+      ["Макс. масштаб","world.maxZoom",this.balance.world.maxZoom],
+      ["Шанс без месторождений (0–1)","resources.emptyRegionChance",this.balance.resources?.emptyRegionChance??0],
+      ["Макс. угольных мест","resources.coal.maxCount",this.balance.resources?.coal.maxCount??4],
+      ["Макс. торфяных мест","resources.peat.maxCount",this.balance.resources?.peat.maxCount??5]
     ];
     return `<div class="modal-backdrop"><section class="dialog dev-dialog"><button class="close" data-action="close" aria-label="Закрыть">×</button>
       <div class="eyebrow">РЕЖИМ РАЗРАБОТЧИКА / SEED ${this.campaign.seed}</div><h2>Баланс игры</h2>
       <p>Применение начнёт новую кампанию с тем же seed. Экспортируйте файл и замените <code>public/data/balance.json</code>, чтобы сохранить изменения в проекте.</p>
+      <label class="resource-mode-label">Месторождения <select id="resource-mode">
+        <option value="random" ${this.balance.resources?.mode==="random"?"selected":""}>Случайные</option>
+        <option value="none" ${this.balance.resources?.mode==="none"?"selected":""}>Без угля и торфа (ГЭС)</option>
+        <option value="fixed" ${this.balance.resources?.mode==="fixed"?"selected":""}>Из файла региона</option>
+      </select></label>
       <div class="balance-fields">${fields.map(([title,path,value])=>`<label>${e(title)}<input type="number" step="any" value="${value}" data-balance-path="${path}"></label>`).join("")}</div>
       <label class="json-label">Все настройки<textarea id="balance-json" spellcheck="false">${e(JSON.stringify(this.balance,null,2))}</textarea></label>
       <div class="button-row"><button data-action="apply-balance" class="primary">ПРИМЕНИТЬ И ПЕРЕЗАПУСТИТЬ</button><button data-action="export-balance">ЭКСПОРТ BALANCE.JSON</button></div>
       </section></div>`;
   }
+  private art(name:string):string {
+    const path=this.data.manifest.ui?.[name];
+    return path?e(new URL(path,document.baseURI).href):"";
+  }
   private renderUI():void {
     let html="";
     const c=this.campaign;
     if(this.phase==="menu"){
-      const resume=this.saved&&["map","playing"].includes(this.saved.status);
-      html=`<div class="menu-content"><div class="eyebrow">БЕЛАРУСЬ / СТРАТЕГИЯ ЭЛЕКТРИФИКАЦИИ</div>
-        <h1>ПЛАН<br><em>СВЕТА</em></h1><div class="title-line"></div>
-        <p>Проведите энергию через страну.<br>Дайте свет поселениям.<br>Выполните промышленный план.</p>
-        <button class="play-button" data-action="play">ИГРАТЬ <span>→</span></button>
-        ${resume?`<div class="resume-note">Продолжить сохранённую кампанию · ${e(this.saved!.completed.length)}/6 областей</div><button class="text-button" data-action="new">Начать заново</button>`:""}
-        </div><div class="menu-footer"><span>1922 — 1927 / ИГРОВАЯ КАМПАНИЯ</span><span>УСЛОВНЫЕ КАРТЫ И РЕСУРСЫ</span></div>
+      const resume=this.saved&&["map","playing","reprimand"].includes(this.saved.status);
+      html=`<div class="menu-content art-menu">
+        <h1 class="sr-only">РАЗ, СВЕТ!</h1>
+        <img class="game-logo" src="${this.art("logo")}" alt="РАЗ, СВЕТ!">
+        <button class="play-button art-play" data-action="play" aria-label="Играть"><img src="${this.art("playLabel")}" alt="ИГРАТЬ"></button>
+        ${resume?`<div class="resume-note">Продолжить кампанию · ${e(this.saved!.completed.length)}/6 областей</div><button class="new-campaign-button" data-action="new">Новая кампания</button>`:""}
+        </div><div class="menu-footer"><span>СТРАТЕГИЯ ЭЛЕКТРИФИКАЦИИ</span><span>БЕЛАРУСЬ / 1922—1927</span></div>
         ${this.dev?'<button class="dev-corner" data-action="dev">БАЛАНС</button>':""}`;
     }else if(this.phase==="intro"){
       html=`<div class="intro-top"><span>ИСТОРИЯ СВЕТА</span><button data-action="skip" class="text-button">Пропустить →</button></div>
@@ -441,31 +541,42 @@ export class App {
     }else if(this.phase==="transition"){
       html='<div class="transition-label">РАЗВОРАЧИВАНИЕ РЕГИОНАЛЬНОГО ПЛАНА…</div>';
     }else if(this.phase==="region"){
-      html=`<header class="hud-top"><div class="top-left"><button class="icon-button" data-action="pause" title="Пауза (Esc)" aria-label="Пауза">Ⅱ</button><button class="icon-button" data-action="help" title="Справка">?</button><button class="icon-button sound-button" data-action="sound" title="Звук">${this.audio.enabled?"♪":"♩"}</button><div class="region-name"><small>ОБЛАСТНОЙ ПЛАН</small><b>${e(c.region!.name.toUpperCase())}</b></div></div>
-        <div class="year"><b>${this.balance.campaign.firstYear+c.stage}</b><small>ГОД</small></div>
-        <div class="ledger"><div class="ledger-top"><span>ГОСПЛАН</span><b id="factories-hud">0 / 0</b></div><div class="ledger-caption">ГОСПЛАНОВ ОБЕСПЕЧЕНО</div><div class="money"><strong id="money">0</strong><span>₽</span></div><div class="income" id="income">+0 ₽/с</div></div></header>
+      html=`<header class="hud-top"><div class="top-left">
+        <button class="art-icon" data-action="menu" title="В меню (пауза и сохранение)" aria-label="Меню"><img src="${this.art("home")}" alt=""></button>
+        <button class="art-icon" data-action="settings" title="Настройки" aria-label="Настройки"><img src="${this.art("settings")}" alt=""></button>
+        <button class="pause-mini" data-action="pause" title="Пауза (Esc)" aria-label="Пауза">Ⅱ</button>
+        </div><div class="region-name"><b>${e(c.region!.name.toUpperCase())}</b><small>${this.balance.campaign.firstYear+c.stage} ГОД</small></div>
+        <div class="ledger"><div class="currency-row"><button class="art-icon radio-button" data-action="sound" title="Включить музыку" aria-label="Радио" aria-pressed="${this.audio.enabled}"><img id="radio-image" src="${this.art("radioOff")}" alt="Радио"><span class="music-mark" aria-hidden="true">♫</span></button><img class="coin" src="${this.art("coin")}" alt="Рубли"><strong id="money">0</strong></div>
+        <div class="income" id="income">+0 ₽/с</div><div class="ledger-top"><span>ГОСПЛАН</span><b id="factories-hud">0 / 0</b></div><div id="strikes-hud" class="strikes-hud"></div></div></header>
         <div class="foreman" id="foreman"><img src="${e(new URL(this.data.manifest.overseer,document.baseURI).href)}" alt="Надсмотрщик"><div><small>УПОЛНОМОЧЕННЫЙ ПО ПЛАНУ</small><p id="foreman-text"></p></div></div>
-        <aside class="time-panel"><div class="time-title">СРОК</div><div class="month-track"><div id="time-fill"></div>${months.map((m,i)=>`<div class="month" data-month="${i}">${m}</div>`).join("")}</div><strong id="countdown">3:00</strong></aside>
+        <aside class="time-panel"><div class="month-track" aria-label="Месяцы госплана"><img id="time-empty" src="${this.art("timeOff")}" alt="Январь — декабрь"><img id="time-fill" src="${this.art("timeOn")}" alt=""><div class="sr-only">${months.join(" ")}</div></div><strong id="countdown">3:00</strong></aside>
+        <div class="mini-map" title="Нажмите, чтобы переместить камеру"><img src="${e(new URL(c.region!.map,document.baseURI).href)}" alt="Обзор области"><i id="mini-viewport"></i></div>
         <div class="map-controls"><button data-action="matrix" title="Матрица (M)">СЕТЬ</button><button data-action="zoom-in" aria-label="Приблизить">+</button><button data-action="zoom-out" aria-label="Отдалить">−</button><button data-action="home" title="Сбросить камеру">⌂</button>${this.dev?'<button data-action="dev">DEV</button>':""}</div>
         <div class="inspector-container">${this.inspector()}</div>
         <div class="build-area"><div class="build-top"><button class="voltage-toggle ${this.poleVoltage}" data-action="voltage"><span>ОПОРА</span> ${this.poleVoltage==="hv"?"10 кВ / ВН":"400 В / НН"} <kbd>V</kbd></button><div class="tool-hint">${e(this.toolHint())}</div><button data-action="inspect" class="inspect-button ${this.tool==="inspect"?"selected":""}" title="Выбор (0)">ВЫБОР <kbd>0</kbd></button></div>
         <nav class="dock" aria-label="Строительство">${order.map((t,i)=>{
           const build=BUILD_KINDS.includes(t as BuildKind),price=build?`${c.price(t as BuildKind)} ₽`:t==="cable"?`${n(this.balance.lines.hv.pricePerKm*c.priceFactor,1)} ₽/км ВН`:`ВОЗВРАТ ${n(this.balance.economy.refundFraction*100)}%`;
           return `<button data-action="tool" data-tool="${t}" class="build-card ${this.tool===t?"selected":""}"><kbd>${i+1}</kbd>
-          ${build?`<img src="${e(this.assets.thumb(t as BuildKind))}" alt="">`:`<span class="tool-symbol">${t==="cable"?"∿":"×"}</span>`}
+          ${build?`<img src="${e(this.assets.thumb(t as BuildKind))}" alt="">`:`<img class="tool-art" src="${this.art(t==="cable"?"wire":"destroy")}" alt="">`}
           <b>${titles[t]}</b><small>${price}</small></button>`;
         }).join("")}</nav></div>
         <div class="network-foot" id="network-foot"></div>
         ${c.paused&&!this.modal?`<div class="modal-backdrop pause-backdrop"><section class="dialog pause-dialog"><div class="eyebrow">ВРЕМЯ И ДОХОД ОСТАНОВЛЕНЫ</div><h2>ПАУЗА</h2><button class="primary" data-action="pause">ПРОДОЛЖИТЬ</button><button class="text-button" data-action="menu">В главное меню</button></section></div>`:""}`;
     }else if(this.phase==="result"){
-      const o=c.lastOutcome!,win=c.status==="won";
-      html=`<section class="result-card ${o.success?"success":"failure"}"><div class="eyebrow">${o.success?"ДОКЛАД ПРИНЯТ":"ПЛАН СОРВАН"} / ${e(o.regionName.toUpperCase())}</div>
-        <h1>${win?"СТРАНА<br><em>СТАЛА СВЕТЛЕЕ</em>":o.success?"ПЛАН<br><em>ВЫПОЛНЕН</em>":"ВЫ НЕ ВЫПОЛНИЛИ ПЛАН<br><em>И ОТПРАВЛЯЕТЕСЬ В СИБИРЬ</em>"}</h1>
-        <p>${win?"Все шесть регионов электрифицированы.":o.success?"Регион освещён и закрыт. Накопленные деньги переходят в следующий этап.":"В момент окончания срока не все объекты госплана получали необходимую мощность."}</p>
-        <div class="result-stats"><div><small>ГОСПЛАНЫ</small><b>${o.poweredObjectives} / ${o.objectives}</b></div><div><small>ДОХОД ЭТАПА</small><b>${n(o.incomeEarned,0)} ₽</b></div><div><small>В КАЗНЕ</small><b>${n(c.money,0)} ₽</b></div></div>
-        <button class="primary" data-action="${o.success&&!win?"next-region":"new"}">${o.success&&!win?"ВЫБРАТЬ СЛЕДУЮЩУЮ ОБЛАСТЬ":"НОВАЯ КАМПАНИЯ"} →</button>
+      const o=c.lastOutcome!,win=c.status==="won",penalty=c.status==="reprimand",final=c.status==="failed";
+      const title=final?"Ваша электрификация Беларуси завершена. Теперь, товарищ, вы электрифицируете Сибирь!":
+        penalty?"План сорван. Назначен штраф.":win?"Страна стала светлее!":"План выполнен!";
+      const description=penalty?`Штраф ${n(o.fine,0)} ₽. Нарушение ${c.strikes} из ${c.penaltyRules.maxStrikes}. Сеть сохранена. На исправление плана даётся ${c.penaltyRules.retrySeconds} секунд. Отрицательный баланс — долг, который погашается доходом.`:
+        final?`Третье нарушение за кампанию. Партия поручает вам новое направление работ.`:
+        win?"Все шесть регионов электрифицированы.":"Регион освещён и закрыт. Деньги и счётчик нарушений переходят в следующий этап.";
+      html=`<section class="result-card ${penalty?"penalty":final?"siberia":"success"}"><div class="eyebrow">${e(o.regionName.toUpperCase())} / ${c.strikes} НАРУШЕНИЙ</div>
+        <h1>${title}</h1><p>${description}</p>
+        <div class="result-stats"><div><small>ГОСПЛАНЫ</small><b>${o.poweredObjectives} / ${o.objectives}</b></div><div><small>${penalty?"ШТРАФ":"ДОХОД ЭТАПА"}</small><b>${n(penalty?o.fine:o.incomeEarned,0)} ₽</b></div><div><small>КАЗНА</small><b>${n(c.money,0)} ₽</b></div></div>
+        <button class="primary" data-action="${penalty?"retry-plan":o.success&&!win?"next-region":"new"}">${penalty?"ИСПРАВИТЬ ПЛАН":o.success&&!win?"СЛЕДУЮЩАЯ ОБЛАСТЬ":"НОВАЯ КАМПАНИЯ"} →</button>
         <button class="text-button" data-action="menu">В главное меню</button></section>`;
     }
+    if(this.phase==="menu"||this.phase==="country")html+=`<button class="art-icon settings-corner" data-action="settings" aria-label="Настройки"><img src="${this.art("settings")}" alt=""></button>`;
+    if(this.modal==="settings")html+=this.settingsPanel();
     if(this.modal==="matrix")html+=this.matrix();
     if(this.modal==="help")html+=this.help();
     if(this.modal==="dev")html+=this.developerPanel();
@@ -477,12 +588,21 @@ export class App {
     const c=this.campaign;
     const set=(id:string,value:string)=>{const el=this.ui.querySelector<HTMLElement>("#"+id);if(el&&el.textContent!==value)el.textContent=value;};
     set("money",n(Math.floor(c.money),0));
+    this.ui.querySelector("#money")?.classList.toggle("debt",c.money<0);
+    set("strikes-hud",`НАРУШЕНИЯ ${c.strikes} / ${c.penaltyRules.maxStrikes}`);
     set("income",`+${n(c.incomeRate)} ₽/с`);
     set("factories-hud",`${c.poweredObjectives} / ${c.objectiveCount}`);
     const left=Math.ceil(c.remaining);
     set("countdown",`${Math.floor(left/60)}:${String(left%60).padStart(2,"0")}`);
     const fill=this.ui.querySelector<HTMLElement>("#time-fill");
-    if(fill)fill.style.height=`${clamp(c.elapsed/c.duration*100,0,100)}%`;
+    const unfilled=this.ui.querySelector<HTMLElement>("#time-empty");
+    if(unfilled)unfilled.style.clipPath=`inset(${clamp(c.elapsed/c.duration*100,0,100)}% 0 0 0)`;
+    if(fill)fill.style.clipPath=`inset(0 0 ${100-clamp(c.elapsed/c.duration*100,0,100)}% 0)`;
+    const mini=this.ui.querySelector<HTMLElement>("#mini-viewport");
+    if(mini){
+      const view=worldView(this.width,this.height,this.balance,this.camera);
+      Object.assign(mini.style,{left:`${-view.x/view.w*100}%`,top:`${-view.y/view.h*100}%`,width:`${this.width/view.w*100}%`,height:`${this.height/view.h*100}%`});
+    }
     for(const m of this.ui.querySelectorAll<HTMLElement>("[data-month]"))
       m.classList.toggle("elapsed",(Number(m.dataset.month)+.5)/12<c.elapsed/c.duration);
     for(const button of this.ui.querySelectorAll<HTMLElement>("[data-tool]")){
@@ -503,7 +623,18 @@ export class App {
         c.remaining<messages.urgentBelowSeconds&&plan?`Товарищ! Напоминаю: "${plan.name}" должен быть запитан без перебоев.`:
         plan?(index<plans.length?`Товарищ! Партия постановила вам запитать "${plan.name}" в течение ${plan.months} ${monthsWord(plan.months)}.`:`Товарищ! Напоминаю о госплане: "${plan.name}" должен быть обеспечен электроэнергией.`):messages.regular[index%messages.regular.length];
       set("foreman-text",remark);
-      message.classList.toggle("visible",c.elapsed<this.messageUntil&&!c.paused);
+      const visible=c.elapsed<this.messageUntil&&!c.paused;
+      message.classList.toggle("visible",visible);
+      const radio=this.ui.querySelector<HTMLButtonElement>(".radio-button");
+      const image=this.ui.querySelector<HTMLImageElement>("#radio-image");
+      const path=this.data.manifest.ui?.[visible?"radioOn":"radioOff"];
+      if(image&&path){const url=new URL(path,document.baseURI).href;if(image.src!==url)image.src=url;}
+      if(radio){
+        radio.classList.toggle("music-enabled",this.audio.enabled);
+        radio.dataset.message=visible?"on":"off";
+        radio.setAttribute("aria-pressed",String(this.audio.enabled));
+        radio.title=(this.audio.enabled?"Выключить музыку":"Включить музыку")+(visible?" / Новое объявление":"");
+      }
     }
   }
 }

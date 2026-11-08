@@ -1,0 +1,80 @@
+[
+  {
+    "region": "grodno",
+    "actions": 20,
+    "waited": 7.758108108108101,
+    "elapsed": 31.758108108108097,
+    "balance": 6.1850000000000005,
+    "income": 5,
+    "station": "hydro",
+    "deliveredKW": 368.0000000000001,
+    "lossesKW": 35.7181470055239,
+    "success": true,
+    "resources": 0
+  },
+  {
+    "region": "brest",
+    "actions": 22,
+    "waited": 0,
+    "elapsed": 26.39999999999999,
+    "balance": 65.67445945945934,
+    "income": 6.1,
+    "station": "coal",
+    "deliveredKW": 404,
+    "lossesKW": 38.54451669735254,
+    "success": true,
+    "resources": 3
+  },
+  {
+    "region": "minsk",
+    "actions": 20,
+    "waited": 0,
+    "elapsed": 23.999999999999993,
+    "balance": 404.6144594594588,
+    "income": 5,
+    "station": "coal",
+    "deliveredKW": 368.00000000000017,
+    "lossesKW": 37.64661918412712,
+    "success": true,
+    "resources": 4
+  },
+  {
+    "region": "vitebsk",
+    "actions": 15,
+    "waited": 0,
+    "elapsed": 17.999999999999996,
+    "balance": 513.9744594594589,
+    "income": 3.7,
+    "station": "hydro",
+    "deliveredKW": 344,
+    "lossesKW": 35.48540874290606,
+    "success": true,
+    "resources": 4
+  },
+  {
+    "region": "mogilev",
+    "actions": 19,
+    "waited": 0,
+    "elapsed": 22.799999999999994,
+    "balance": 292.5944594594587,
+    "income": 3.7,
+    "station": "hydro",
+    "deliveredKW": 343.9999999999999,
+    "lossesKW": 35.67782935621025,
+    "success": true,
+    "resources": 3
+  },
+  {
+    "region": "gomel",
+    "actions": 17,
+    "waited": 0,
+    "elapsed": 20.399999999999995,
+    "balance": 88.35445945945872,
+    "income": 3.7,
+    "station": "coal",
+    "deliveredKW": 343.9999999999999,
+    "lossesKW": 34.06638302342553,
+    "success": true,
+    "resources": 7
+  }
+]

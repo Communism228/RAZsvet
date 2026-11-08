@@ -1,0 +1,551 @@
+{
+  "count": 109,
+  "method": "HTTP fetch of complete standalone directory with byte-for-byte comparison",
+  "files": [
+    {
+      "path": "assets/audio/README.txt",
+      "status": 200,
+      "bytes": 148
+    },
+    {
+      "path": "assets/country/brest-mask.png",
+      "status": 200,
+      "bytes": 13126
+    },
+    {
+      "path": "assets/country/dark.png",
+      "status": 200,
+      "bytes": 205885
+    },
+    {
+      "path": "assets/country/dark.svg",
+      "status": 200,
+      "bytes": 187129
+    },
+    {
+      "path": "assets/country/gomel-mask.png",
+      "status": 200,
+      "bytes": 14469
+    },
+    {
+      "path": "assets/country/grodno-mask.png",
+      "status": 200,
+      "bytes": 13150
+    },
+    {
+      "path": "assets/country/hydro-vectors.svg",
+      "status": 200,
+      "bytes": 92457
+    },
+    {
+      "path": "assets/country/light.png",
+      "status": 200,
+      "bytes": 217290
+    },
+    {
+      "path": "assets/country/light.svg",
+      "status": 200,
+      "bytes": 187107
+    },
+    {
+      "path": "assets/country/minsk-mask.png",
+      "status": 200,
+      "bytes": 14881
+    },
+    {
+      "path": "assets/country/mogilev-mask.png",
+      "status": 200,
+      "bytes": 13990
+    },
+    {
+      "path": "assets/country/vitebsk-mask.png",
+      "status": 200,
+      "bytes": 14604
+    },
+    {
+      "path": "assets/country/water-vectors.svg",
+      "status": 200,
+      "bytes": 120400
+    },
+    {
+      "path": "assets/intro/1.png",
+      "status": 200,
+      "bytes": 454880
+    },
+    {
+      "path": "assets/intro/2.png",
+      "status": 200,
+      "bytes": 519071
+    },
+    {
+      "path": "assets/intro/3.png",
+      "status": 200,
+      "bytes": 183675
+    },
+    {
+      "path": "assets/intro/4.png",
+      "status": 200,
+      "bytes": 281456
+    },
+    {
+      "path": "assets/intro/5.png",
+      "status": 200,
+      "bytes": 223979
+    },
+    {
+      "path": "assets/intro/6.png",
+      "status": 200,
+      "bytes": 203766
+    },
+    {
+      "path": "assets/intro/7.png",
+      "status": 200,
+      "bytes": 468513
+    },
+    {
+      "path": "assets/menu/backButton.png",
+      "status": 200,
+      "bytes": 461252
+    },
+    {
+      "path": "assets/menu/background.png",
+      "status": 200,
+      "bytes": 2804421
+    },
+    {
+      "path": "assets/menu/button.png",
+      "status": 200,
+      "bytes": 471965
+    },
+    {
+      "path": "assets/menu/logo.png",
+      "status": 200,
+      "bytes": 287570
+    },
+    {
+      "path": "assets/menu/playLabel.png",
+      "status": 200,
+      "bytes": 72192
+    },
+    {
+      "path": "assets/regions/brest/base.png",
+      "status": 200,
+      "bytes": 284161
+    },
+    {
+      "path": "assets/regions/brest/blocked-mask.png",
+      "status": 200,
+      "bytes": 5229
+    },
+    {
+      "path": "assets/regions/brest/hydro-mask.png",
+      "status": 200,
+      "bytes": 6604
+    },
+    {
+      "path": "assets/regions/brest/spawn-mask.png",
+      "status": 200,
+      "bytes": 4803
+    },
+    {
+      "path": "assets/regions/brest/water-mask.png",
+      "status": 200,
+      "bytes": 7419
+    },
+    {
+      "path": "assets/regions/gomel/base.png",
+      "status": 200,
+      "bytes": 318843
+    },
+    {
+      "path": "assets/regions/gomel/blocked-mask.png",
+      "status": 200,
+      "bytes": 5382
+    },
+    {
+      "path": "assets/regions/gomel/hydro-mask.png",
+      "status": 200,
+      "bytes": 8655
+    },
+    {
+      "path": "assets/regions/gomel/spawn-mask.png",
+      "status": 200,
+      "bytes": 4900
+    },
+    {
+      "path": "assets/regions/gomel/water-mask.png",
+      "status": 200,
+      "bytes": 8729
+    },
+    {
+      "path": "assets/regions/grodno/base.png",
+      "status": 200,
+      "bytes": 287941
+    },
+    {
+      "path": "assets/regions/grodno/blocked-mask.png",
+      "status": 200,
+      "bytes": 4940
+    },
+    {
+      "path": "assets/regions/grodno/hydro-mask.png",
+      "status": 200,
+      "bytes": 5360
+    },
+    {
+      "path": "assets/regions/grodno/spawn-mask.png",
+      "status": 200,
+      "bytes": 4650
+    },
+    {
+      "path": "assets/regions/grodno/water-mask.png",
+      "status": 200,
+      "bytes": 5439
+    },
+    {
+      "path": "assets/regions/minsk/base.png",
+      "status": 200,
+      "bytes": 338905
+    },
+    {
+      "path": "assets/regions/minsk/blocked-mask.png",
+      "status": 200,
+      "bytes": 5316
+    },
+    {
+      "path": "assets/regions/minsk/hydro-mask.png",
+      "status": 200,
+      "bytes": 6745
+    },
+    {
+      "path": "assets/regions/minsk/spawn-mask.png",
+      "status": 200,
+      "bytes": 4922
+    },
+    {
+      "path": "assets/regions/minsk/water-mask.png",
+      "status": 200,
+      "bytes": 7214
+    },
+    {
+      "path": "assets/regions/mogilev/base.png",
+      "status": 200,
+      "bytes": 293597
+    },
+    {
+      "path": "assets/regions/mogilev/blocked-mask.png",
+      "status": 200,
+      "bytes": 5292
+    },
+    {
+      "path": "assets/regions/mogilev/hydro-mask.png",
+      "status": 200,
+      "bytes": 7154
+    },
+    {
+      "path": "assets/regions/mogilev/spawn-mask.png",
+      "status": 200,
+      "bytes": 4888
+    },
+    {
+      "path": "assets/regions/mogilev/water-mask.png",
+      "status": 200,
+      "bytes": 7154
+    },
+    {
+      "path": "assets/regions/vitebsk/base.png",
+      "status": 200,
+      "bytes": 348475
+    },
+    {
+      "path": "assets/regions/vitebsk/blocked-mask.png",
+      "status": 200,
+      "bytes": 5565
+    },
+    {
+      "path": "assets/regions/vitebsk/hydro-mask.png",
+      "status": 200,
+      "bytes": 7715
+    },
+    {
+      "path": "assets/regions/vitebsk/spawn-mask.png",
+      "status": 200,
+      "bytes": 5083
+    },
+    {
+      "path": "assets/regions/vitebsk/water-mask.png",
+      "status": 200,
+      "bytes": 8378
+    },
+    {
+      "path": "assets/sprites/city-off.png",
+      "status": 200,
+      "bytes": 452623
+    },
+    {
+      "path": "assets/sprites/city-on.png",
+      "status": 200,
+      "bytes": 411464
+    },
+    {
+      "path": "assets/sprites/coal.png",
+      "status": 200,
+      "bytes": 257093
+    },
+    {
+      "path": "assets/sprites/factory.png",
+      "status": 200,
+      "bytes": 405222
+    },
+    {
+      "path": "assets/sprites/hydro.png",
+      "status": 200,
+      "bytes": 429945
+    },
+    {
+      "path": "assets/sprites/peat.png",
+      "status": 200,
+      "bytes": 418849
+    },
+    {
+      "path": "assets/sprites/pole.png",
+      "status": 200,
+      "bytes": 92819
+    },
+    {
+      "path": "assets/sprites/transformer.png",
+      "status": 200,
+      "bytes": 469433
+    },
+    {
+      "path": "assets/sprites/village-off.png",
+      "status": 200,
+      "bytes": 382738
+    },
+    {
+      "path": "assets/sprites/village.png",
+      "status": 200,
+      "bytes": 485552
+    },
+    {
+      "path": "assets/ui/Siberia.png",
+      "status": 200,
+      "bytes": 2447061
+    },
+    {
+      "path": "assets/ui/coin.png",
+      "status": 200,
+      "bytes": 386672
+    },
+    {
+      "path": "assets/ui/destroy.png",
+      "status": 200,
+      "bytes": 53020
+    },
+    {
+      "path": "assets/ui/dialog.png",
+      "status": 200,
+      "bytes": 259061
+    },
+    {
+      "path": "assets/ui/home.png",
+      "status": 200,
+      "bytes": 24859
+    },
+    {
+      "path": "assets/ui/overseer.png",
+      "status": 200,
+      "bytes": 265477
+    },
+    {
+      "path": "assets/ui/radio-off.png",
+      "status": 200,
+      "bytes": 133606
+    },
+    {
+      "path": "assets/ui/radio-on.png",
+      "status": 200,
+      "bytes": 157220
+    },
+    {
+      "path": "assets/ui/radio.png",
+      "status": 200,
+      "bytes": 236580
+    },
+    {
+      "path": "assets/ui/settings.png",
+      "status": 200,
+      "bytes": 242168
+    },
+    {
+      "path": "assets/ui/timeOff.png",
+      "status": 200,
+      "bytes": 160437
+    },
+    {
+      "path": "assets/ui/timeOn.png",
+      "status": 200,
+      "bytes": 221767
+    },
+    {
+      "path": "assets/ui/wire.png",
+      "status": 200,
+      "bytes": 28951
+    },
+    {
+      "path": "data/assets.json",
+      "status": 200,
+      "bytes": 2940
+    },
+    {
+      "path": "data/balance.json",
+      "status": 200,
+      "bytes": 2743
+    },
+    {
+      "path": "data/campaign.json",
+      "status": 200,
+      "bytes": 212
+    },
+    {
+      "path": "data/intro.json",
+      "status": 200,
+      "bytes": 1086
+    },
+    {
+      "path": "data/messages.json",
+      "status": 200,
+      "bytes": 1295
+    },
+    {
+      "path": "data/regions/brest.json",
+      "status": 200,
+      "bytes": 1813
+    },
+    {
+      "path": "data/regions/gomel.json",
+      "status": 200,
+      "bytes": 1813
+    },
+    {
+      "path": "data/regions/grodno.json",
+      "status": 200,
+      "bytes": 1818
+    },
+    {
+      "path": "data/regions/minsk.json",
+      "status": 200,
+      "bytes": 1808
+    },
+    {
+      "path": "data/regions/mogilev.json",
+      "status": 200,
+      "bytes": 1827
+    },
+    {
+      "path": "data/regions/vitebsk.json",
+      "status": 200,
+      "bytes": 1828
+    },
+    {
+      "path": "index.html",
+      "status": 200,
+      "bytes": 477
+    },
+    {
+      "path": "js/app.js",
+      "status": 200,
+      "bytes": 60318
+    },
+    {
+      "path": "js/assets.js",
+      "status": 200,
+      "bytes": 7527
+    },
+    {
+      "path": "js/bootstrap.js",
+      "status": 200,
+      "bytes": 1160
+    },
+    {
+      "path": "js/model/campaign.js",
+      "status": 200,
+      "bytes": 16090
+    },
+    {
+      "path": "js/model/resources.js",
+      "status": 200,
+      "bytes": 1599
+    },
+    {
+      "path": "js/model/settings.js",
+      "status": 200,
+      "bytes": 5357
+    },
+    {
+      "path": "js/model/simplex.js",
+      "status": 200,
+      "bytes": 2944
+    },
+    {
+      "path": "js/model/simulation.js",
+      "status": 200,
+      "bytes": 10693
+    },
+    {
+      "path": "js/model/terrain.js",
+      "status": 200,
+      "bytes": 5279
+    },
+    {
+      "path": "js/model/types.js",
+      "status": 200,
+      "bytes": 1115
+    },
+    {
+      "path": "js/model/world.js",
+      "status": 200,
+      "bytes": 10100
+    },
+    {
+      "path": "js/render/native.js",
+      "status": 200,
+      "bytes": 795
+    },
+    {
+      "path": "js/render/paint.js",
+      "status": 200,
+      "bytes": 16815
+    },
+    {
+      "path": "js/render/surface.js",
+      "status": 200,
+      "bytes": 11
+    },
+    {
+      "path": "js/standalone.js",
+      "status": 200,
+      "bytes": 127
+    },
+    {
+      "path": "js/ui/audio.js",
+      "status": 200,
+      "bytes": 4456
+    },
+    {
+      "path": "js/ui/local-media.js",
+      "status": 200,
+      "bytes": 1822
+    },
+    {
+      "path": "js/ui/typography.js",
+      "status": 200,
+      "bytes": 4182
+    },
+    {
+      "path": "style.css",
+      "status": 200,
+      "bytes": 35899
+    }
+  ]
+}

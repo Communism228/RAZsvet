@@ -1,40 +1,44 @@
-# Работа с проектом «План света»
+# RAZ, SVET! v0.6
 
-Приложение на TypeScript. Модель не зависит от DOM, Canvas или Phaser.
-Рабочий и проверяемый по умолчанию рендерер — Canvas 2D. Phaser — дополнительный хост.
-Не переносите правила игры в обработчики рисования и не создавайте второй игровой расчёт.
+TypeScript / Canvas 2D / HTML UI / Vite. Phaser is an optional host, not required for gameplay.
+Do not move network logic into rendering. Do not regenerate source art during ordinary builds.
 
-## Инварианты
-- Матрица смежности — единственный источник топологии. Ненулевые элементы — метры.
-- Матрица симметрична, диагональ нулевая. ID объекта не равен индексу матрицы.
-- Кабельная геометрия и физические расстояния не зависят от камеры и разрешения текстур.
-- Станции и потребители не передают чужую мощность. Опоры передают; трансформатор направлен ВН -> НН.
-- Потребители одной группы снабжения получают равный процент своей потребности после потерь.
-- Все заводы проверяются одновременно на дедлайне; кратковременное включение не запоминается.
-- Завершённые регионы заблокированы и не начисляют доход.
-- Неуспешная покупка/соединение не списывает деньги. Возврат основан на реально уплаченной цене.
-- Пауза/скрытая вкладка не начисляют доход и не расходуют игровой срок.
-- Не ослабляйте ограничения ради прохождения тестов; исправляйте данные или правила явно.
+## Invariants
+- The sole network topology is the symmetric adjacency matrix. Values are metres, zero means absent.
+- Only poles transit ordinary power. Transformers convert HV to LV. Consumers and plants do not transit.
+- Equal delivered demand fraction after cable/converter losses. Camera and icon resolution never change physical distances.
+- The current objectives (factories AND settlements), not all buildings, are checked simultaneously at regional deadline.
+- Runtime deposits come from generateResources(), once per campaign stage, and are included in save v6.
+- Buildings must be inside region, land footprints cannot touch water; hydro's anchor must be on river mask.
+- Visible icons reserve clearanceWidthM / clearanceHeightM to prevent overlap; these differ from the land footprint.
+- Pause/hidden tab stops economy and time. Closed regions cannot earn income or reopen.
+- Prices and refunds use actual payments. Failing placement/connection never spends money.
 
-## Где изменять
-- Баланс: public/data/balance.json.
-- Карты, ресурсы, подготовленные точки: public/data/regions/*.json.
-- Графика: public/data/assets.json и public/assets/.
-- Вступление: public/data/intro.json.
-- Реплики: public/data/messages.json.
-- Обоснование математических упрощений: docs/POWER_MODEL_RU.md.
-- Требования художникам: docs/ASSETS_RU.md.
+## Files
+public/data/balance.json: economy, physics, camera, random-resource options.
+public/data/assets.json: sprites and UI art paths. Only imported user graphics.
+public/data/regions/*.json: regional crops, masks, consumer anchors.
+src/model/resources.ts: bounded, deterministic, masked generation.
+src/render/paint.ts: map, comic, sprite rendering; src/app.ts: input/UI lifecycle.
+docs/ASSETS_RU.md: exact artist format. docs/POWER_MODEL_RU.md: solver assumptions.
 
-## Проверки
+## Checks
 npm run check:native
-npm run check:assets
 npm test
 npm run build:standalone
+node tests/actual-playthrough.mjs
+python3 tests/v05-browser.py  # requires Python Playwright + Chromium
 
-После установки всех зависимостей также: npm run check && npm run build.
-Проверка Canvas не доказывает работу Phaser. Отмечайте, что именно было запущено.
-Браузерный smoke-test требует Python Playwright и Chromium; fixture описан в tests/browser_fixture.py.
-Не выдавайте fixture с подменённым localStorage за проверку сохранения после HTTP-перезагрузки.
+After installing all npm dependencies also run npm run check && npm run build.
+Browser fixture substitutes transport and localStorage, not game logic. Do not describe it as real HTTP reload verification.
+See docs/VERIFICATION_RU.md for what was actually run.
 
-Не меняйте зависимости, не удаляйте чужую графику, не добавляйте сетевые сервисы без необходимости.
-Не включайте node_modules, секреты и файлы шрифтов из среды в передаваемые архивы.
+Never package node_modules, caches, secrets or font binaries. Package a complete source + standalone archive, not only a patch.
+
+## v0.6 invariants
+A failed regional deadline counts once, even when several objectives are dark.
+First two violations charge a fine and enter reprimand; retry preserves network/resources/objectives.
+Third violation enters failed/Siberia. Strikes are campaign-wide; negative finite money is valid.
+Music is one looping HTMLAudioElement. Radio art indicates message visibility, not playback.
+Typography imports the user's own font locally; do not package font binaries.
+New media modules: src/ui/audio.ts, typography.ts and local-media.ts (IndexedDB).

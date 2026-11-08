@@ -1,0 +1,426 @@
+{
+  "sprites": {
+    "Buildings/coal.png": {
+      "originalSize": [
+        2481,
+        3508
+      ],
+      "crop": [
+        330,
+        371,
+        2177,
+        3163
+      ],
+      "exportSize": [
+        520,
+        780
+      ],
+      "path": "assets/sprites/coal.png"
+    },
+    "Buildings/peat.png": {
+      "originalSize": [
+        2481,
+        3508
+      ],
+      "crop": [
+        281,
+        591,
+        2324,
+        2934
+      ],
+      "exportSize": [
+        682,
+        780
+      ],
+      "path": "assets/sprites/peat.png"
+    },
+    "Buildings/hydro.png": {
+      "originalSize": [
+        2481,
+        3508
+      ],
+      "crop": [
+        383,
+        832,
+        2209,
+        2524
+      ],
+      "exportSize": [
+        780,
+        724
+      ],
+      "path": "assets/sprites/hydro.png"
+    },
+    "Buildings/factory.png": {
+      "originalSize": [
+        2481,
+        3508
+      ],
+      "crop": [
+        289,
+        883,
+        2231,
+        2981
+      ],
+      "exportSize": [
+        723,
+        780
+      ],
+      "path": "assets/sprites/factory.png"
+    },
+    "Buildings/transformator.png": {
+      "originalSize": [
+        3508,
+        2481
+      ],
+      "crop": [
+        811,
+        3,
+        2886,
+        2233
+      ],
+      "exportSize": [
+        727,
+        780
+      ],
+      "path": "assets/sprites/transformer.png"
+    },
+    "Buildings/village.png": {
+      "originalSize": [
+        2880,
+        1800
+      ],
+      "crop": [
+        830,
+        366,
+        2053,
+        1370
+      ],
+      "exportSize": [
+        780,
+        642
+      ],
+      "path": "assets/sprites/village.png"
+    },
+    "Buildings/city-off.png": {
+      "originalSize": [
+        2481,
+        3508
+      ],
+      "crop": [
+        151,
+        511,
+        2282,
+        2956
+      ],
+      "exportSize": [
+        681,
+        780
+      ],
+      "path": "assets/sprites/city-off.png"
+    },
+    "Buildings/city-on.png": {
+      "originalSize": [
+        2481,
+        3508
+      ],
+      "crop": [
+        151,
+        511,
+        2282,
+        2956
+      ],
+      "exportSize": [
+        681,
+        780
+      ],
+      "path": "assets/sprites/city-on.png"
+    },
+    "Icons/settings.png": {
+      "originalSize": [
+        3508,
+        2481
+      ],
+      "crop": [
+        895,
+        276,
+        2643,
+        2026
+      ],
+      "exportSize": [
+        523,
+        524
+      ],
+      "path": "assets/ui/settings.png"
+    },
+    "Icons/radio.png": {
+      "originalSize": [
+        2481,
+        3508
+      ],
+      "crop": [
+        317,
+        415,
+        2322,
+        2745
+      ],
+      "exportSize": [
+        453,
+        524
+      ],
+      "path": "assets/ui/radio.png"
+    },
+    "Icons/coin.png": {
+      "originalSize": [
+        512,
+        512
+      ],
+      "crop": [
+        4,
+        4,
+        509,
+        509
+      ],
+      "exportSize": [
+        517,
+        517
+      ],
+      "path": "assets/ui/coin.png"
+    },
+    "Icons/Dialog_window.png": {
+      "originalSize": [
+        2880,
+        1800
+      ],
+      "crop": [
+        674,
+        516,
+        2449,
+        886
+      ],
+      "exportSize": [
+        1036,
+        225
+      ],
+      "path": "assets/ui/dialog.png"
+    },
+    "Icons/Time_bar1.png": {
+      "originalSize": [
+        2880,
+        1800
+      ],
+      "crop": [
+        1176,
+        88,
+        1382,
+        1059
+      ],
+      "exportSize": [
+        218,
+        983
+      ],
+      "path": "assets/ui/timeOff.png"
+    },
+    "Icons/Time_bar2.png": {
+      "originalSize": [
+        2880,
+        1800
+      ],
+      "crop": [
+        1432,
+        88,
+        1639,
+        1059
+      ],
+      "exportSize": [
+        219,
+        983
+      ],
+      "path": "assets/ui/timeOn.png"
+    },
+    "overseer/Overseer.png": {
+      "originalSize": [
+        7087,
+        4724
+      ],
+      "crop": [
+        790,
+        214,
+        1435,
+        962
+      ],
+      "exportSize": [
+        453,
+        524
+      ],
+      "path": "assets/ui/overseer.png"
+    },
+    "Main menu/Logo.png": {
+      "originalSize": [
+        2880,
+        1800
+      ],
+      "crop": [
+        99,
+        110,
+        1672,
+        466
+      ],
+      "exportSize": [
+        1212,
+        284
+      ],
+      "path": "assets/menu/logo.png"
+    },
+    "Main menu/play_button.png": {
+      "originalSize": [
+        2880,
+        1800
+      ],
+      "crop": [
+        497,
+        655,
+        1217,
+        874
+      ],
+      "exportSize": [
+        732,
+        231
+      ],
+      "path": "assets/menu/playLabel.png"
+    },
+    "Main menu/Button.png": {
+      "originalSize": [
+        2880,
+        1800
+      ],
+      "crop": [
+        124,
+        502,
+        1637,
+        1073
+      ],
+      "exportSize": [
+        1212,
+        465
+      ],
+      "path": "assets/menu/button.png"
+    },
+    "Main menu/back_button.png": {
+      "originalSize": [
+        2880,
+        1800
+      ],
+      "crop": [
+        146,
+        546,
+        1638,
+        971
+      ],
+      "exportSize": [
+        1212,
+        354
+      ],
+      "path": "assets/menu/backButton.png"
+    },
+    "introCommonCrop": {
+      "box": [
+        98,
+        100,
+        4647,
+        5182
+      ],
+      "exportSize": [
+        1611,
+        1800
+      ]
+    }
+  },
+  "regions": [
+    {
+      "id": "brest",
+      "crop": {
+        "x": 171.0,
+        "y": 439.0,
+        "width": 484.0,
+        "height": 302.0
+      },
+      "whitePixels": {
+        "water": 15820,
+        "hydro": 12549
+      },
+      "anchors": 10
+    },
+    {
+      "id": "gomel",
+      "crop": {
+        "x": 519.5,
+        "y": 446.5,
+        "width": 550.0,
+        "height": 343.0
+      },
+      "whitePixels": {
+        "water": 18593,
+        "hydro": 18005
+      },
+      "anchors": 10
+    },
+    {
+      "id": "grodno",
+      "crop": {
+        "x": 103.5,
+        "y": 193.5,
+        "width": 588.0,
+        "height": 367.0
+      },
+      "whitePixels": {
+        "water": 6364,
+        "hydro": 6187
+      },
+      "anchors": 10
+    },
+    {
+      "id": "minsk",
+      "crop": {
+        "x": 284.5,
+        "y": 191.0,
+        "width": 693.0,
+        "height": 433.0
+      },
+      "whitePixels": {
+        "water": 7604,
+        "hydro": 5733
+      },
+      "anchors": 10
+    },
+    {
+      "id": "mogilev",
+      "crop": {
+        "x": 625.5,
+        "y": 271.5,
+        "width": 487.0,
+        "height": 305.0
+      },
+      "whitePixels": {
+        "water": 12999,
+        "hydro": 12999
+      },
+      "anchors": 10
+    },
+    {
+      "id": "vitebsk",
+      "crop": {
+        "x": 462.5,
+        "y": 19.0,
+        "width": 508.0,
+        "height": 318.0
+      },
+      "whitePixels": {
+        "water": 22470,
+        "hydro": 16185
+      },
+      "anchors": 10
+    }
+  ],
+  "vectorShapesExtracted": 495
+}

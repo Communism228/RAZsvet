@@ -1,0 +1,612 @@
+{
+  "files": 101,
+  "allBytesMatch": true,
+  "checks": [
+    {
+      "path": "assets/country/brest-mask.png",
+      "http": 200,
+      "bytes": 13126,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/country/dark.png",
+      "http": 200,
+      "bytes": 205885,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/country/dark.svg",
+      "http": 200,
+      "bytes": 187129,
+      "type": "image/svg+xml"
+    },
+    {
+      "path": "assets/country/gomel-mask.png",
+      "http": 200,
+      "bytes": 14469,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/country/grodno-mask.png",
+      "http": 200,
+      "bytes": 13150,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/country/hydro-vectors.svg",
+      "http": 200,
+      "bytes": 92457,
+      "type": "image/svg+xml"
+    },
+    {
+      "path": "assets/country/light.png",
+      "http": 200,
+      "bytes": 217290,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/country/light.svg",
+      "http": 200,
+      "bytes": 187107,
+      "type": "image/svg+xml"
+    },
+    {
+      "path": "assets/country/minsk-mask.png",
+      "http": 200,
+      "bytes": 14881,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/country/mogilev-mask.png",
+      "http": 200,
+      "bytes": 13990,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/country/vitebsk-mask.png",
+      "http": 200,
+      "bytes": 14604,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/country/water-vectors.svg",
+      "http": 200,
+      "bytes": 120400,
+      "type": "image/svg+xml"
+    },
+    {
+      "path": "assets/intro/1.png",
+      "http": 200,
+      "bytes": 454880,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/intro/2.png",
+      "http": 200,
+      "bytes": 519071,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/intro/3.png",
+      "http": 200,
+      "bytes": 183675,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/intro/4.png",
+      "http": 200,
+      "bytes": 281456,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/intro/5.png",
+      "http": 200,
+      "bytes": 223979,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/intro/6.png",
+      "http": 200,
+      "bytes": 203766,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/intro/7.png",
+      "http": 200,
+      "bytes": 468513,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/menu/backButton.png",
+      "http": 200,
+      "bytes": 461252,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/menu/background.png",
+      "http": 200,
+      "bytes": 2804421,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/menu/button.png",
+      "http": 200,
+      "bytes": 471965,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/menu/logo.png",
+      "http": 200,
+      "bytes": 287570,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/menu/playLabel.png",
+      "http": 200,
+      "bytes": 72192,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/regions/brest/base.png",
+      "http": 200,
+      "bytes": 284161,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/regions/brest/blocked-mask.png",
+      "http": 200,
+      "bytes": 5229,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/regions/brest/hydro-mask.png",
+      "http": 200,
+      "bytes": 6604,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/regions/brest/spawn-mask.png",
+      "http": 200,
+      "bytes": 4803,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/regions/brest/water-mask.png",
+      "http": 200,
+      "bytes": 7419,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/regions/gomel/base.png",
+      "http": 200,
+      "bytes": 318843,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/regions/gomel/blocked-mask.png",
+      "http": 200,
+      "bytes": 5382,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/regions/gomel/hydro-mask.png",
+      "http": 200,
+      "bytes": 8655,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/regions/gomel/spawn-mask.png",
+      "http": 200,
+      "bytes": 4900,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/regions/gomel/water-mask.png",
+      "http": 200,
+      "bytes": 8729,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/regions/grodno/base.png",
+      "http": 200,
+      "bytes": 287941,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/regions/grodno/blocked-mask.png",
+      "http": 200,
+      "bytes": 4940,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/regions/grodno/hydro-mask.png",
+      "http": 200,
+      "bytes": 5360,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/regions/grodno/spawn-mask.png",
+      "http": 200,
+      "bytes": 4650,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/regions/grodno/water-mask.png",
+      "http": 200,
+      "bytes": 5439,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/regions/minsk/base.png",
+      "http": 200,
+      "bytes": 338905,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/regions/minsk/blocked-mask.png",
+      "http": 200,
+      "bytes": 5316,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/regions/minsk/hydro-mask.png",
+      "http": 200,
+      "bytes": 6745,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/regions/minsk/spawn-mask.png",
+      "http": 200,
+      "bytes": 4922,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/regions/minsk/water-mask.png",
+      "http": 200,
+      "bytes": 7214,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/regions/mogilev/base.png",
+      "http": 200,
+      "bytes": 293597,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/regions/mogilev/blocked-mask.png",
+      "http": 200,
+      "bytes": 5292,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/regions/mogilev/hydro-mask.png",
+      "http": 200,
+      "bytes": 7154,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/regions/mogilev/spawn-mask.png",
+      "http": 200,
+      "bytes": 4888,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/regions/mogilev/water-mask.png",
+      "http": 200,
+      "bytes": 7154,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/regions/vitebsk/base.png",
+      "http": 200,
+      "bytes": 348475,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/regions/vitebsk/blocked-mask.png",
+      "http": 200,
+      "bytes": 5565,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/regions/vitebsk/hydro-mask.png",
+      "http": 200,
+      "bytes": 7715,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/regions/vitebsk/spawn-mask.png",
+      "http": 200,
+      "bytes": 5083,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/regions/vitebsk/water-mask.png",
+      "http": 200,
+      "bytes": 8378,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/sprites/city-off.png",
+      "http": 200,
+      "bytes": 452623,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/sprites/city-on.png",
+      "http": 200,
+      "bytes": 411464,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/sprites/coal.png",
+      "http": 200,
+      "bytes": 257093,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/sprites/factory.png",
+      "http": 200,
+      "bytes": 405222,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/sprites/hydro.png",
+      "http": 200,
+      "bytes": 429945,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/sprites/peat.png",
+      "http": 200,
+      "bytes": 418849,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/sprites/pole.png",
+      "http": 200,
+      "bytes": 9417,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/sprites/transformer.png",
+      "http": 200,
+      "bytes": 469433,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/sprites/village-off.png",
+      "http": 200,
+      "bytes": 382738,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/sprites/village.png",
+      "http": 200,
+      "bytes": 485552,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/ui/coin.png",
+      "http": 200,
+      "bytes": 386672,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/ui/dialog.png",
+      "http": 200,
+      "bytes": 259061,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/ui/home.png",
+      "http": 200,
+      "bytes": 24859,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/ui/overseer.png",
+      "http": 200,
+      "bytes": 265477,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/ui/radio.png",
+      "http": 200,
+      "bytes": 236580,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/ui/settings.png",
+      "http": 200,
+      "bytes": 242168,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/ui/timeOff.png",
+      "http": 200,
+      "bytes": 160338,
+      "type": "image/png"
+    },
+    {
+      "path": "assets/ui/timeOn.png",
+      "http": 200,
+      "bytes": 221767,
+      "type": "image/png"
+    },
+    {
+      "path": "data/assets.json",
+      "http": 200,
+      "bytes": 2636,
+      "type": "application/json; charset=utf-8"
+    },
+    {
+      "path": "data/balance.json",
+      "http": 200,
+      "bytes": 2637,
+      "type": "application/json; charset=utf-8"
+    },
+    {
+      "path": "data/campaign.json",
+      "http": 200,
+      "bytes": 212,
+      "type": "application/json; charset=utf-8"
+    },
+    {
+      "path": "data/intro.json",
+      "http": 200,
+      "bytes": 1086,
+      "type": "application/json; charset=utf-8"
+    },
+    {
+      "path": "data/messages.json",
+      "http": 200,
+      "bytes": 1295,
+      "type": "application/json; charset=utf-8"
+    },
+    {
+      "path": "data/regions/brest.json",
+      "http": 200,
+      "bytes": 1813,
+      "type": "application/json; charset=utf-8"
+    },
+    {
+      "path": "data/regions/gomel.json",
+      "http": 200,
+      "bytes": 1813,
+      "type": "application/json; charset=utf-8"
+    },
+    {
+      "path": "data/regions/grodno.json",
+      "http": 200,
+      "bytes": 1818,
+      "type": "application/json; charset=utf-8"
+    },
+    {
+      "path": "data/regions/minsk.json",
+      "http": 200,
+      "bytes": 1808,
+      "type": "application/json; charset=utf-8"
+    },
+    {
+      "path": "data/regions/mogilev.json",
+      "http": 200,
+      "bytes": 1827,
+      "type": "application/json; charset=utf-8"
+    },
+    {
+      "path": "data/regions/vitebsk.json",
+      "http": 200,
+      "bytes": 1828,
+      "type": "application/json; charset=utf-8"
+    },
+    {
+      "path": "index.html",
+      "http": 200,
+      "bytes": 477,
+      "type": "text/html; charset=utf-8"
+    },
+    {
+      "path": "js/app.js",
+      "http": 200,
+      "bytes": 51997,
+      "type": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "js/assets.js",
+      "http": 200,
+      "bytes": 7527,
+      "type": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "js/bootstrap.js",
+      "http": 200,
+      "bytes": 1160,
+      "type": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "js/model/campaign.js",
+      "http": 200,
+      "bytes": 13539,
+      "type": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "js/model/resources.js",
+      "http": 200,
+      "bytes": 1599,
+      "type": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "js/model/settings.js",
+      "http": 200,
+      "bytes": 4940,
+      "type": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "js/model/simplex.js",
+      "http": 200,
+      "bytes": 2944,
+      "type": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "js/model/simulation.js",
+      "http": 200,
+      "bytes": 10693,
+      "type": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "js/model/terrain.js",
+      "http": 200,
+      "bytes": 5279,
+      "type": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "js/model/types.js",
+      "http": 200,
+      "bytes": 1115,
+      "type": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "js/model/world.js",
+      "http": 200,
+      "bytes": 10100,
+      "type": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "js/render/native.js",
+      "http": 200,
+      "bytes": 795,
+      "type": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "js/render/paint.js",
+      "http": 200,
+      "bytes": 16096,
+      "type": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "js/render/surface.js",
+      "http": 200,
+      "bytes": 11,
+      "type": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "js/standalone.js",
+      "http": 200,
+      "bytes": 127,
+      "type": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "js/ui/audio.js",
+      "http": 200,
+      "bytes": 854,
+      "type": "text/javascript; charset=utf-8"
+    },
+    {
+      "path": "style.css",
+      "http": 200,
+      "bytes": 25687,
+      "type": "text/css; charset=utf-8"
+    }
+  ]
+}

@@ -35,7 +35,7 @@ def install(page, saved=None, dev=False):
                      '</style></head><body><main id="app"><div id="display"></div></main></body></html>')
     page.evaluate("""({resources,saved})=>{
       const store=new Map();
-      if(saved) store.set("electrification-campaign-v3",JSON.stringify(saved));
+      if(saved) store.set("raz-svet-campaign-v6",JSON.stringify(saved));
       Object.defineProperty(window,"localStorage",{configurable:true,value:{
         getItem:k=>store.get(k)??null,setItem:(k,v)=>store.set(k,String(v)),
         removeItem:k=>store.delete(k),clear:()=>store.clear()

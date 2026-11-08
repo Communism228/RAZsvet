@@ -1,0 +1,446 @@
+
+> raz-svet@0.6.0 test
+> tsc -p tsconfig.model.json && node --test tests/*.test.mjs
+
+TAP version 13
+# Subtest: viewBox-only SVG cannot silently pass a map/mask size check
+ok 1 - viewBox-only SVG cannot silently pass a map/mask size check
+  ---
+  duration_ms: 7.086578
+  type: 'test'
+  ...
+# Subtest: reads explicit pixel sizes on the SVG root, including px and single quotes
+ok 2 - reads explicit pixel sizes on the SVG root, including px and single quotes
+  ---
+  duration_ms: 5.342615
+  type: 'test'
+  ...
+# Subtest: child image dimensions cannot be mistaken for root dimensions
+ok 3 - child image dimensions cannot be mistaken for root dimensions
+  ---
+  duration_ms: 0.489516
+  type: 'test'
+  ...
+# Subtest: percent SVG dimensions are not accepted as fixed pixel dimensions
+ok 4 - percent SVG dimensions are not accepted as fixed pixel dimensions
+  ---
+  duration_ms: 0.46021
+  type: 'test'
+  ...
+# Subtest: size mismatch reports both dimensions
+ok 5 - size mismatch reports both dimensions
+  ---
+  duration_ms: 0.301282
+  type: 'test'
+  ...
+# Subtest: country images and all six masks share a 1280 x 800 pixel canvas
+ok 6 - country images and all six masks share a 1280 x 800 pixel canvas
+  ---
+  duration_ms: 28.367197
+  type: 'test'
+  ...
+# Subtest: balance schema rejects NaN, wrong voltages and fractional limits
+ok 7 - balance schema rejects NaN, wrong voltages and fractional limits
+  ---
+  duration_ms: 4.249699
+  type: 'test'
+  ...
+# Subtest: all default balance values validate
+ok 8 - all default balance values validate
+  ---
+  duration_ms: 0.341521
+  type: 'test'
+  ...
+# Subtest: matrix stores metres and is symmetric
+ok 9 - matrix stores metres and is symmetric
+  ---
+  duration_ms: 2.676951
+  type: 'test'
+  ...
+# Subtest: self connections, duplicates and missing endpoints rejected
+ok 10 - self connections, duplicates and missing endpoints rejected
+  ---
+  duration_ms: 0.515332
+  type: 'test'
+  ...
+# Subtest: no direct high-voltage station to low-voltage consumer
+ok 11 - no direct high-voltage station to low-voltage consumer
+  ---
+  duration_ms: 0.4784
+  type: 'test'
+  ...
+# Subtest: high and low poles cannot be directly joined
+ok 12 - high and low poles cannot be directly joined
+  ---
+  duration_ms: 1.309852
+  type: 'test'
+  ...
+# Subtest: cable length caps distinguish high/low voltage
+ok 13 - cable length caps distinguish high/low voltage
+  ---
+  duration_ms: 0.780002
+  type: 'test'
+  ...
+# Subtest: buildings cannot overlap
+ok 14 - buildings cannot overlap
+  ---
+  duration_ms: 0.51195
+  type: 'test'
+  ...
+# Subtest: world boundary checks the footprint
+ok 15 - world boundary checks the footprint
+  ---
+  duration_ms: 2.819499
+  type: 'test'
+  ...
+# Subtest: station must be within its resource radius
+ok 16 - station must be within its resource radius
+  ---
+  duration_ms: 1.075138
+  type: 'test'
+  ...
+# Subtest: whole footprint intersects water even when center is dry
+ok 17 - whole footprint intersects water even when center is dry
+  ---
+  duration_ms: 6.938195
+  type: 'test'
+  ...
+# Subtest: hydro needs a white point on hydro mask
+ok 18 - hydro needs a white point on hydro mask
+  ---
+  duration_ms: 0.549002
+  type: 'test'
+  ...
+# Subtest: a black hydro mask forbids hydro even on water
+ok 19 - a black hydro mask forbids hydro even on water
+  ---
+  duration_ms: 0.789992
+  type: 'test'
+  ...
+# Subtest: lossless model delivers exactly demand and transformer efficiency
+ok 20 - lossless model delivers exactly demand and transformer efficiency
+  ---
+  duration_ms: 9.043345
+  type: 'test'
+  ...
+# Subtest: insufficient supply uses equal percentage, not equal kW
+ok 21 - insufficient supply uses equal percentage, not equal kW
+  ---
+  duration_ms: 1.012336
+  type: 'test'
+  ...
+# Subtest: a disconnected consumer does not reduce connected ones
+ok 22 - a disconnected consumer does not reduce connected ones
+  ---
+  duration_ms: 3.526787
+  type: 'test'
+  ...
+# Subtest: transformer output capacity is enforced
+ok 23 - transformer output capacity is enforced
+  ---
+  duration_ms: 1.034225
+  type: 'test'
+  ...
+# Subtest: cable losses depend on length and preserve the energy balance
+ok 24 - cable losses depend on length and preserve the energy balance
+  ---
+  duration_ms: 5.417655
+  type: 'test'
+  ...
+# Subtest: a longer low-voltage line needs more generation for the same delivered power
+ok 25 - a longer low-voltage line needs more generation for the same delivered power
+  ---
+  duration_ms: 6.782119
+  type: 'test'
+  ...
+# Subtest: consumers do not transit power
+ok 26 - consumers do not transit power
+  ---
+  duration_ms: 1.824202
+  type: 'test'
+  ...
+# Subtest: stations do not transit power
+ok 27 - stations do not transit power
+  ---
+  duration_ms: 0.598966
+  type: 'test'
+  ...
+# Subtest: two sources cooperate through poles
+ok 28 - two sources cooperate through poles
+  ---
+  duration_ms: 7.083367
+  type: 'test'
+  ...
+# Subtest: cycles preserve power balance
+ok 29 - cycles preserve power balance
+  ---
+  duration_ms: 9.943703
+  type: 'test'
+  ...
+# Subtest: fixed consumers cannot be sold
+ok 30 - fixed consumers cannot be sold
+  ---
+  duration_ms: 0.84749
+  type: 'test'
+  ...
+# Subtest: deleting a building removes its row, column and incident cables
+ok 31 - deleting a building removes its row, column and incident cables
+  ---
+  duration_ms: 0.310403
+  type: 'test'
+  ...
+# Subtest: save roundtrip preserves matrix and ports
+ok 32 - save roundtrip preserves matrix and ports
+  ---
+  duration_ms: 2.771043
+  type: 'test'
+  ...
+# Subtest: tampered matrix distances are rejected
+ok 33 - tampered matrix distances are rejected
+  ---
+  duration_ms: 1.197798
+  type: 'test'
+  ...
+# Subtest: mask outside and integral any query
+ok 34 - mask outside and integral any query
+  ---
+  duration_ms: 0.115067
+  type: 'test'
+  ...
+# Subtest: seeded placement is deterministic, finite and nonoverlapping
+ok 35 - seeded placement is deterministic, finite and nonoverlapping
+  ---
+  duration_ms: 1.178597
+  type: 'test'
+  ...
+# Subtest: all six regions and 25 seeds populate without water overlap
+ok 36 - all six regions and 25 seeds populate without water overlap
+  ---
+  duration_ms: 75.383384
+  type: 'test'
+  ...
+# Subtest: failed purchase never spends money
+ok 37 - failed purchase never spends money
+  ---
+  duration_ms: 0.760824
+  type: 'test'
+  ...
+# Subtest: successful purchase and deletion use original paid price
+ok 38 - successful purchase and deletion use original paid price
+  ---
+  duration_ms: 0.55396
+  type: 'test'
+  ...
+# Subtest: failed cable purchase never spends money
+ok 39 - failed cable purchase never spends money
+  ---
+  duration_ms: 0.303157
+  type: 'test'
+  ...
+# Subtest: time and income stop together during pause
+ok 40 - time and income stop together during pause
+  ---
+  duration_ms: 4.45331
+  type: 'test'
+  ...
+# Subtest: only fully supplied settlements earn money; factories do not
+ok 41 - only fully supplied settlements earn money; factories do not
+  ---
+  duration_ms: 0.399239
+  type: 'test'
+  ...
+# Subtest: deadline advances only remaining active seconds (no excess income)
+ok 42 - deadline advances only remaining active seconds (no excess income)
+  ---
+  duration_ms: 0.612333
+  type: 'test'
+  ...
+# Subtest: one previously powered factory is insufficient if disconnected at deadline
+ok 43 - one previously powered factory is insufficient if disconnected at deadline
+  ---
+  duration_ms: 2.842774
+  type: 'test'
+  ...
+# Subtest: completed region is locked; money carries into next stage
+ok 44 - completed region is locked; money carries into next stage
+  ---
+  duration_ms: 0.852146
+  type: 'test'
+  ...
+# Subtest: deadline with missing power fails even when money is positive
+ok 45 - deadline with missing power fails even when money is positive
+  ---
+  duration_ms: 0.436788
+  type: 'test'
+  ...
+# Subtest: campaign save resumes paused and rejects changed balance
+ok 46 - campaign save resumes paused and rejects changed balance
+  ---
+  duration_ms: 5.058106
+  type: 'test'
+  ...
+# Subtest: all regions complete leads to victory
+ok 47 - all regions complete leads to victory
+  ---
+  duration_ms: 0.78263
+  type: 'test'
+  ...
+# Subtest: simplex basic lexicographic solve
+ok 48 - simplex basic lexicographic solve
+  ---
+  duration_ms: 0.142166
+  type: 'test'
+  ...
+# Subtest: connected high-voltage loop remains balanced and useful
+ok 49 - connected high-voltage loop remains balanced and useful
+  ---
+  duration_ms: 7.306151
+  type: 'test'
+  ...
+# Subtest: all six stages can settle a fully supplied current plan and carry their balance
+ok 50 - all six stages can settle a fully supplied current plan and carry their balance
+  ---
+  duration_ms: 23.225405
+  type: 'test'
+  ...
+# Subtest: first failed deadline issues one fine and permits debt
+ok 51 - first failed deadline issues one fine and permits debt
+  ---
+  duration_ms: 10.585436
+  type: 'test'
+  ...
+# Subtest: oversized dt and repeated updates do not multiply fines
+ok 52 - oversized dt and repeated updates do not multiply fines
+  ---
+  duration_ms: 2.842362
+  type: 'test'
+  ...
+# Subtest: retry keeps network, objective IDs and resource positions
+ok 53 - retry keeps network, objective IDs and resource positions
+  ---
+  duration_ms: 5.217616
+  type: 'test'
+  ...
+# Subtest: second violation fines 180; third sends to Siberia, exactly once
+ok 54 - second violation fines 180; third sends to Siberia, exactly once
+  ---
+  duration_ms: 3.04367
+  type: 'test'
+  ...
+# Subtest: settlement income repays debt without creating automatic credit
+ok 55 - settlement income repays debt without creating automatic credit
+  ---
+  duration_ms: 4.680282
+  type: 'test'
+  ...
+# Subtest: strike count survives a successful regional deadline
+ok 56 - strike count survives a successful regional deadline
+  ---
+  duration_ms: 3.402695
+  type: 'test'
+  ...
+# Subtest: negative balance and pending reprimand restore without a second charge
+ok 57 - negative balance and pending reprimand restore without a second charge
+  ---
+  duration_ms: 3.231385
+  type: 'test'
+  ...
+# Subtest: active retry resumes paused with debt and remaining grace time
+ok 58 - active retry resumes paused with debt and remaining grace time
+  ---
+  duration_ms: 1.811567
+  type: 'test'
+  ...
+# Subtest: Siberia outcome can be restored without an active region
+ok 59 - Siberia outcome can be restored without an active region
+  ---
+  duration_ms: 3.858702
+  type: 'test'
+  ...
+# Subtest: strikes are global across regions
+ok 60 - strikes are global across regions
+  ---
+  duration_ms: 3.96535
+  type: 'test'
+  ...
+# Subtest: invalid counters and nonfinite debt are rejected
+ok 61 - invalid counters and nonfinite debt are rejected
+  ---
+  duration_ms: 5.281377
+  type: 'test'
+  ...
+# Subtest: warning pauses money/time and prevents spending
+ok 62 - warning pauses money/time and prevents spending
+  ---
+  duration_ms: 0.856545
+  type: 'test'
+  ...
+# Subtest: penalty settings validation rejects fractional strikes and negative fines
+ok 63 - penalty settings validation rejects fractional strikes and negative fines
+  ---
+  duration_ms: 1.308595
+  type: 'test'
+  ...
+# Subtest: all six masks come from distinct atlas crops with actual river pixels
+ok 64 - all six masks come from distinct atlas crops with actual river pixels
+  ---
+  duration_ms: 149.209287
+  type: 'test'
+  ...
+# Subtest: identical seeds reproduce all deposits and other seeds change them
+ok 65 - identical seeds reproduce all deposits and other seeds change them
+  ---
+  duration_ms: 7.566036
+  type: 'test'
+  ...
+# Subtest: resource generation respects land and region boundaries over 150 seeded maps
+ok 66 - resource generation respects land and region boundaries over 150 seeded maps
+  ---
+  duration_ms: 8.206969
+  type: 'test'
+  ...
+# Subtest: explicit none mode produces no deposits in any region, and keeps hydropower possible
+ok 67 - explicit none mode produces no deposits in any region, and keeps hydropower possible
+  ---
+  duration_ms: 16.417607
+  type: 'test'
+  ...
+# Subtest: explicit probability 1 allows both a whole region and an individual resource type to be absent
+ok 68 - explicit probability 1 allows both a whole region and an individual resource type to be absent
+  ---
+  duration_ms: 0.342792
+  type: 'test'
+  ...
+# Subtest: all six regions populate eight distinct settlements and two factories on actual dry masks
+ok 69 - all six regions populate eight distinct settlements and two factories on actual dry masks
+  ---
+  duration_ms: 16.776574
+  type: 'test'
+  ...
+# Subtest: saved active region preserves random resources exactly and resumes paused
+ok 70 - saved active region preserves random resources exactly and resumes paused
+  ---
+  duration_ms: 3.353958
+  type: 'test'
+  ...
+# Subtest: tampered resource positions and duplicates are rejected on restore
+ok 71 - tampered resource positions and duplicates are rejected on restore
+  ---
+  duration_ms: 1.26576
+  type: 'test'
+  ...
+# Subtest: invalid generation modes and camera ranges fail configuration validation
+ok 72 - invalid generation modes and camera ranges fail configuration validation
+  ---
+  duration_ms: 0.959676
+  type: 'test'
+  ...
+1..72
+# tests 72
+# suites 0
+# pass 72
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1180.889348

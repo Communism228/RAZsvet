@@ -23,8 +23,36 @@ export function validateBalance(data) {
     number(b.world.maxBuildings, "Лимит зданий", 8, 100);
     number(b.world.maxCables, "Лимит кабелей", 8, 160);
     number(b.world.minZoom, "Минимальный масштаб", 1, 1);
-    number(b.world.maxZoom, "Максимальный масштаб", 1, 3);
-    number(b.world.maxPanFraction, "Смещение камеры", 0, 0.25);
+    number(b.world.maxZoom, "Максимальный масштаб", 1, 6);
+    number(b.world.maxPanFraction, "Смещение камеры", 0, 0.5);
+    if (b.world.initialZoom !== undefined)
+        number(b.world.initialZoom, "world.initialZoom", b.world.minZoom, b.world.maxZoom);
+    if (b.resources) {
+        const r = b.resources;
+        if (!["none", "random", "fixed"].includes(r.mode))
+            throw new Error("resources.mode must be random, none or fixed");
+        number(r.emptyRegionChance, "resources.emptyRegionChance", 0, 1);
+        for (const kind of ["coal", "peat"]) {
+            const c = r[kind];
+            if (!c)
+                throw new Error(`Missing resources.${kind}`);
+            number(c.minCount, `${kind}.minCount`, 0, 12);
+            number(c.maxCount, `${kind}.maxCount`, c.minCount, 12);
+            if (!Number.isInteger(c.minCount) || !Number.isInteger(c.maxCount))
+                throw new Error("Resource counts must be integers");
+            number(c.noneChance, `${kind}.noneChance`, 0, 1);
+            number(c.radiusM, `${kind}.radiusM`, 200, 2500);
+        }
+    }
+    if (b.penalties) {
+        const p = b.penalties;
+        number(p.fine, "penalties.fine", 0, 1e7);
+        number(p.fineGrowth, "penalties.fineGrowth", 0, 1e7);
+        number(p.maxStrikes, "penalties.maxStrikes", 1, 10);
+        number(p.retrySeconds, "penalties.retrySeconds", 5, 3600);
+        if (!Number.isInteger(p.maxStrikes))
+            throw new Error("penalties.maxStrikes must be an integer");
+    }
     number(b.simulation.fullPowerThreshold, "Порог освещения", 0.95, 1);
     number(b.simulation.lossSegments, "Сегменты потерь", 4, 32);
     for (const n of [b.world.maxBuildings, b.world.maxCables, b.simulation.lossSegments])
@@ -37,6 +65,10 @@ export function validateBalance(data) {
         number(k.price, `${kind}.price`, 0, 1e6);
         number(k.widthM, `${kind}.widthM`, 50, 3000);
         number(k.heightM, `${kind}.heightM`, 50, 3000);
+        if (k.clearanceWidthM !== undefined)
+            number(k.clearanceWidthM, `${kind}.clearanceWidthM`, k.widthM, 5000);
+        if (k.clearanceHeightM !== undefined)
+            number(k.clearanceHeightM, `${kind}.clearanceHeightM`, k.heightM, 5000);
         if (["coal", "peat", "hydro"].includes(kind))
             number(k.generationKW, `${kind}.generationKW`, 1, 10000);
         if (["city", "village", "factory"].includes(kind)) {

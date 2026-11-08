@@ -77,7 +77,7 @@ export class Terrain {
                     return true;
         return false;
     }
-    placementError(kind, x, y) {
+    placementError(kind, x, y, ignoreResource = false) {
         const s = this.balance.buildings[kind], world = this.balance.world;
         if (x - s.widthM / 2 < 0 || y - s.heightM / 2 < 0 ||
             x + s.widthM / 2 > world.widthM || y + s.heightM / 2 > world.heightM)
@@ -90,7 +90,7 @@ export class Terrain {
         }
         else if (this.touches("water", x, y, s.widthM, s.heightM))
             return "Это вода. Наземные здания и опоры ставятся на суше.";
-        if (kind === "coal" || kind === "peat") {
+        if (!ignoreResource && (kind === "coal" || kind === "peat")) {
             if (!this.region.deposits.some(d => d.kind === kind &&
                 Math.hypot(x - d.u * world.widthM, y - d.v * world.heightM) <= d.radiusM))
                 return kind === "coal" ? "Угольная ТЭС строится внутри угольного месторождения." : "Торфяная ТЭС строится внутри торфяного болота.";

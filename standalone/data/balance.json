@@ -16,11 +16,12 @@
     "widthM": 20000,
     "heightM": 12500,
     "clearanceM": 90,
-    "maxBuildings": 60,
-    "maxCables": 90,
+    "maxBuildings": 85,
+    "maxCables": 125,
     "minZoom": 1,
-    "maxZoom": 1.65,
-    "maxPanFraction": 0.14
+    "maxZoom": 4,
+    "maxPanFraction": 0.5,
+    "initialZoom": 1.7
   },
   "simulation": {
     "lossSegments": 16,
@@ -30,53 +31,69 @@
     "coal": {
       "price": 120,
       "generationKW": 420,
-      "widthM": 920,
-      "heightM": 850
+      "widthM": 550,
+      "heightM": 540,
+      "clearanceWidthM": 798,
+      "clearanceHeightM": 1194
     },
     "peat": {
       "price": 85,
       "generationKW": 240,
-      "widthM": 880,
-      "heightM": 840
+      "widthM": 540,
+      "heightM": 520,
+      "clearanceWidthM": 908,
+      "clearanceHeightM": 1037
     },
     "hydro": {
       "price": 180,
       "generationKW": 520,
-      "widthM": 950,
-      "heightM": 800
+      "widthM": 580,
+      "heightM": 480,
+      "clearanceWidthM": 1050,
+      "clearanceHeightM": 975
     },
     "pole": {
       "price": 8,
-      "widthM": 300,
-      "heightM": 420
+      "widthM": 180,
+      "heightM": 220,
+      "clearanceWidthM": 397,
+      "clearanceHeightM": 725
     },
     "transformer": {
       "price": 35,
       "outputLimitKW": 200,
       "efficiency": 0.96,
-      "widthM": 760,
-      "heightM": 650
+      "widthM": 420,
+      "heightM": 400,
+      "clearanceWidthM": 880,
+      "clearanceHeightM": 944
     },
     "village": {
       "price": 0,
       "demandKW": 24,
       "incomePerSec": 1.3,
-      "widthM": 850,
-      "heightM": 700
+      "widthM": 480,
+      "heightM": 400,
+      "clearanceWidthM": 917,
+      "clearanceHeightM": 756
     },
     "city": {
       "price": 0,
       "demandKW": 60,
       "incomePerSec": 2.4,
-      "widthM": 1100,
-      "heightM": 880
+      "widthM": 570,
+      "heightM": 480,
+      "clearanceWidthM": 906,
+      "clearanceHeightM": 1037
     },
     "factory": {
       "price": 0,
       "demandKW": 130,
       "incomePerSec": 0,
-      "widthM": 1050,
-      "heightM": 880
+      "widthM": 600,
+      "heightM": 520,
+      "clearanceWidthM": 991,
+      "clearanceHeightM": 1068
     }
   },
   "lines": {
@@ -94,5 +111,27 @@
       "maxCurrentA": 500,
       "pricePerKm": 6
     }
+  },
+  "resources": {
+    "mode": "random",
+    "emptyRegionChance": 0.12,
+    "coal": {
+      "minCount": 2,
+      "maxCount": 4,
+      "noneChance": 0.22,
+      "radiusM": 800
+    },
+    "peat": {
+      "minCount": 2,
+      "maxCount": 5,
+      "noneChance": 0.22,
+      "radiusM": 850
+    }
+  },
+  "penalties": {
+    "fine": 120,
+    "fineGrowth": 60,
+    "maxStrikes": 3,
+    "retrySeconds": 120
   }
 }

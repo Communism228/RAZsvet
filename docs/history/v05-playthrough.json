@@ -1,0 +1,84 @@
+{
+  "seed": 8723,
+  "status": "won",
+  "regions": [
+    {
+      "region": "grodno",
+      "actions": 20,
+      "waited": 7.758108108108101,
+      "elapsed": 31.758108108108097,
+      "balance": 6.1850000000000005,
+      "income": 5,
+      "station": "hydro",
+      "deliveredKW": 367.9999999999999,
+      "lossesKW": 37.43214428967394,
+      "success": true,
+      "resources": 0
+    },
+    {
+      "region": "brest",
+      "actions": 22,
+      "waited": 0,
+      "elapsed": 26.39999999999999,
+      "balance": 65.67445945945934,
+      "income": 6.1,
+      "station": "coal",
+      "deliveredKW": 404,
+      "lossesKW": 38.54451669735254,
+      "success": true,
+      "resources": 3
+    },
+    {
+      "region": "minsk",
+      "actions": 20,
+      "waited": 0,
+      "elapsed": 23.999999999999993,
+      "balance": 399.6144594594588,
+      "income": 5,
+      "station": "coal",
+      "deliveredKW": 367.9999999999999,
+      "lossesKW": 37.606168772934176,
+      "success": true,
+      "resources": 4
+    },
+    {
+      "region": "vitebsk",
+      "actions": 15,
+      "waited": 0,
+      "elapsed": 17.999999999999996,
+      "balance": 510.97445945945884,
+      "income": 3.7,
+      "station": "hydro",
+      "deliveredKW": 343.9999999999999,
+      "lossesKW": 35.48132284878489,
+      "success": true,
+      "resources": 4
+    },
+    {
+      "region": "mogilev",
+      "actions": 19,
+      "waited": 0,
+      "elapsed": 22.799999999999994,
+      "balance": 290.5944594594587,
+      "income": 3.7,
+      "station": "hydro",
+      "deliveredKW": 344.0000000000002,
+      "lossesKW": 35.673386783203775,
+      "success": true,
+      "resources": 3
+    },
+    {
+      "region": "gomel",
+      "actions": 17,
+      "waited": 0,
+      "elapsed": 20.399999999999995,
+      "balance": 86.35445945945872,
+      "income": 3.7,
+      "station": "coal",
+      "deliveredKW": 343.9999999999999,
+      "lossesKW": 34.06638302342553,
+      "success": true,
+      "resources": 7
+    }
+  ]
+}

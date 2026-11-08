@@ -15,6 +15,7 @@ export interface BuildingBalance {
   price: number; generationKW?: number; demandKW?: number; incomePerSec?: number;
   outputLimitKW?: number; efficiency?: number;
   widthM: number; heightM: number;
+  clearanceWidthM?: number; clearanceHeightM?: number;
 }
 export interface LineBalance {
   voltageV: number; maxLengthM: number; resistanceOhmPerM: number;
@@ -27,15 +28,24 @@ export interface Balance {
     priceGrowth: number; firstYear: number };
   world: { widthM: number; heightM: number; clearanceM: number;
     maxBuildings: number; maxCables: number; minZoom: number; maxZoom: number;
-    maxPanFraction: number };
+    maxPanFraction: number; initialZoom?: number };
+  resources?: ResourceGeneration;
+  penalties?: { fine: number; fineGrowth: number; maxStrikes: number; retrySeconds: number };
   simulation: { lossSegments: number; fullPowerThreshold: number };
   buildings: Record<Kind, BuildingBalance>;
   lines: Record<Voltage, LineBalance>;
+}
+export interface ResourceGeneration {
+  mode: "random" | "none" | "fixed";
+  emptyRegionChance: number;
+  coal: { minCount: number; maxCount: number; noneChance: number; radiusM: number };
+  peat: { minCount: number; maxCount: number; noneChance: number; radiusM: number };
 }
 export interface Deposit { id: string; kind: "coal" | "peat"; u: number; v: number; radiusM: number }
 export interface RegionConfig {
   id: string; name: string; city: { u: number; v: number };
   seed: number; map: string; countryMask: string;
+  countryCrop?: { x: number; y: number; width: number; height: number };
   masks: { water?: string; hydro?: string; blocked?: string; spawn?: string };
   deposits: Deposit[];
   river: { points: [number, number][]; widthM: number } | null;
@@ -49,6 +59,8 @@ export interface SpriteSpec {
   frames?: { width: number; height: number; count: number; fps: number };
 }
 export interface AssetsManifest {
+  ui?: Record<string,string>;
+  audio?: { background: string | null; volume: number };
   menu?: { background: string; showNetworkOverlay?: boolean;
     layers?: {image: string; amplitudeX?: number; amplitudeY?: number; periodMs?: number; opacity?: number}[] };
   country: { dark: string; light: string };
